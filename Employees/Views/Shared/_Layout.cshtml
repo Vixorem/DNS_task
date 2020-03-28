@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/customcss/mystyle.css" />
+</head>
+<body>
+    <header>
+        <nav>
+            <div id="header">
+                <ul>
+                    <li class="leftToRight">
+                        <a asp-area="" asp-controller="Employees" asp-action="Index" style="color: black">Главная</a>
+                    </li>
+                    <li class="leftToRight">
+                        <a asp-area="" asp-controller="Employees" asp-action="About" style="color: black">Инфо</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div>
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
