@@ -45,5 +45,6 @@ namespace Employees.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public object Position { get; internal set; }
     }
 }

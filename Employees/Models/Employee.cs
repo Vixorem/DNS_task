@@ -15,10 +15,10 @@ namespace Employees.Models
         public string Name { get; set; }
         [Display(Name = "Отчество")]
         [StringLength(50)]
-        public string Surname { get; set; }
+        public string Secondname { get; set; }
         [Display(Name = "Фамилия")]
         [StringLength(50)]
-        public string Lastname { get; set; }
+        public string Surname { get; set; }
         public int? BossId { get; set; }
         public int? PositionId { get; set; }
         public int? DepartmentId { get; set; }

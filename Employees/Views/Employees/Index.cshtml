@@ -18,7 +18,7 @@
                 @Html.DisplayNameFor(model => model.Surname)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Lastname)
+                @Html.DisplayNameFor(model => model.Surname)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Position)
@@ -37,24 +37,25 @@
     <tbody>
         @foreach (var item in Model)
         {
+            var bossSurname = (item.Boss == null) ? ("") : (item.Boss.Surname);
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Secondname)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.Surname)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Lastname)
+                    @Html.DisplayFor(modelItem => item.Position.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Position.Id)
+                    @Html.DisplayFor(modelItem => item.Department.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Department.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Boss.Id)
+                    @Html.DisplayFor(modelItem => bossSurname)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

@@ -12,7 +12,7 @@ namespace Employees.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -25,7 +25,7 @@ namespace Employees.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,9 +38,9 @@ namespace Employees.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Surname = table.Column<string>(nullable: true),
-                    Lastname = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(maxLength: 50, nullable: true),
+                    Secondname = table.Column<string>(maxLength: 50, nullable: true),
+                    Surname = table.Column<string>(maxLength: 50, nullable: true),
                     BossId = table.Column<int>(nullable: true),
                     PositionId = table.Column<int>(nullable: true),
                     DepartmentId = table.Column<int>(nullable: true)
@@ -68,6 +68,43 @@ namespace Employees.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Departments",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Продажа" },
+                    { 2, "Разработка" },
+                    { 3, "Техническое обслуживание" },
+                    { 4, "Кадры" },
+                    { 5, "Маркетинг" },
+                    { 6, "Логистика" },
+                    { 7, "Закупки" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Positions",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Младший программист" },
+                    { 2, "Старший программист" },
+                    { 3, "Руководитель отдела" },
+                    { 4, "Менеджер" },
+                    { 5, "Специалист по кадрам" },
+                    { 6, "Директор" },
+                    { 7, "Бухгалтер" },
+                    { 8, "Финансовый директор" },
+                    { 9, "Специалист по закупке" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_Name",
+                table: "Departments",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_BossId",
                 table: "Employees",
@@ -82,6 +119,13 @@ namespace Employees.Migrations
                 name: "IX_Employees_PositionId",
                 table: "Employees",
                 column: "PositionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Positions_Name",
+                table: "Positions",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

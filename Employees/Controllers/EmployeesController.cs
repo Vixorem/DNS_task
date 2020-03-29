@@ -50,9 +50,9 @@ namespace Employees.Controllers
         // GET: Employees/Create
         public IActionResult Create()
         {
-            ViewData["BossId"] = new SelectList(_context.Employees, "Id", "Id");
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id");
-            ViewData["PositionId"] = new SelectList(_context.Positions, "Id", "Id");
+            ViewData["Boss"] = new SelectList(_context.Employees, "Id", "Surname");
+            ViewData["Department"] = new SelectList(_context.Departments, "Id", "Name");
+            ViewData["Position"] = new SelectList(_context.Positions, "Id", "Name");
             return View();
         }
 
@@ -66,10 +66,14 @@ namespace Employees.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Lastname,BossId,PositionId,DepartmentId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Id,Name,Secondname,Surname,BossId,PositionId,DepartmentId")] Employee employee)
         {
             if (ModelState.IsValid)
             {
+/*                if (employee.BossId == null)
+                {
+                    employee.Boss = new Employee { Name = "", Secondname = "", Surname = "" };
+                }*/
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -105,7 +109,7 @@ namespace Employees.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Surname,Lastname,BossId,PositionId,DepartmentId")] Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Secondname,Surname,BossId,PositionId,DepartmentId")] Employee employee)
         {
             if (id != employee.Id)
             {

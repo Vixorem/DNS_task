@@ -1,52 +1,64 @@
 ﻿@model Employees.Models.Employee
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Новый сотрудник";
 }
 
-<h1>Create</h1>
+<style>
+    div.field {
+        padding-bottom: 5px;
+    }
 
-<h4>Employee</h4>
+        div.field label {
+            display: block;
+            float: left;
+            width: 70px;
+            height: 15px;
+        }
+</style>
+
+
+<h4 align="center">Добавить нового сотрудинка</h4>
 <hr />
 <div>
-    <div >
+    <div align="center">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div>
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+            <div asp-validation-summary="ModelOnly"></div>
+            <div class="field">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" style="width: 30%"/>
+                <span asp-validation-for="Name"></span>
             </div>
-            <div>
-                <label asp-for="Surname" class="control-label"></label>
-                <input asp-for="Surname" class="form-control" />
-                <span asp-validation-for="Surname" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="Secondname"></label>
+                <input asp-for="Secondname" style="width: 30%"/>
+                <span asp-validation-for="Secondname"></span>
             </div>
-            <div >
-                <label asp-for="Lastname" class="control-label"></label>
-                <input asp-for="Lastname" class="form-control" />
-                <span asp-validation-for="Lastname" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="Surname"></label>
+                <input asp-for="Surname" style="width: 30%"/>
+                <span asp-validation-for="Surname"> </span>
             </div>
-            <div>
-                <label asp-for="BossId" class="control-label"></label>
-                <select asp-for="BossId" class ="form-control" asp-items="ViewBag.BossId"></select>
+            <div class="field">
+                <label asp-for="BossId"></label>
+                <select asp-for="BossId" asp-items="ViewBag.Boss"></select>
             </div>
-            <div>
-                <label asp-for="PositionId" class="control-label"></label>
-                <select asp-for="PositionId" class ="form-control" asp-items="ViewBag.PositionId"></select>
+            <div class="field">
+                <label asp-for="PositionId"></label>
+                <select asp-for="PositionId" asp-items="ViewBag.Position"></select>
             </div>
-            <div>
-                <label asp-for="DepartmentId" class="control-label"></label>
-                <select asp-for="DepartmentId" class ="form-control" asp-items="ViewBag.DepartmentId"></select>
+            <div class="field">
+                <label asp-for="DepartmentId"></label>
+                <select asp-for="DepartmentId" asp-items="ViewBag.Department"></select>
             </div>
-            <div >
-                <input type="submit" value="Create" />
+            <div class="field">
+                <input type="submit" value="Создать" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Назад</a>
 </div>
 

@@ -3,10 +3,11 @@
 }
 
 .list {
-    text-align: center; 
-    padding: 5px; 
-    background: #FFFFE0; 
+    text-align: center;
+    padding: 5px;
+    background: #FFFFE0;
 }
+
 thead,
 tfoot {
     background-color: #3f87a6;
@@ -40,9 +41,10 @@ td {
     text-align: center;
 }
 
+
 #header {
-    font-size: 2em; 
+    font-size: 2em;
     text-align: center;
     padding: 5px;
-    background: #FFFFE0; 
+    background: #FFFFE0;
 }
