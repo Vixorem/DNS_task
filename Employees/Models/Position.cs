@@ -11,5 +11,14 @@ namespace Employees.Models
         public int Id { get; set; }
         [StringLength(50)]
         public string Name { get; set; }
+
+        public Position(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
+
+        public Position()
+        { }
     }
 }

@@ -31,5 +31,20 @@ namespace Employees.Models
         [Display(Name = "Отдел")]
         [ForeignKey("DepartmentId")]
         public Department Department { get; set; }
+
+        public Employee()
+        { }
+
+        public Employee(int id, string name, string secondname, string surname, 
+            Employee boss, Position pos, Department dep)
+        {
+            Id = id;
+            Name = name;
+            Secondname = secondname;
+            Surname = surname;
+            Boss = boss;
+            Position = pos;
+            Department = dep;
+        }
     }
 }
