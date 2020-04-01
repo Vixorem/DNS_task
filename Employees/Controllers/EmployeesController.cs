@@ -16,7 +16,7 @@ namespace Employees.Controllers
 
 
         // GET: Employees
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var employeeContext = _context.FetchEmployeesRange(fetchSiz, 1);
             return View(employeeContext.ToList());
@@ -62,23 +62,22 @@ namespace Employees.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        /*public async Task<IActionResult> Create([Bind("Id,Name,Secondname,Surname,BossId,PositionId,DepartmentId")] Employee employee)
+        public async Task<IActionResult> Create([Bind("Id,Name,Secondname,Surname,BossId,PositionId,DepartmentId")] Employee employee)
         {
             if (ModelState.IsValid)
             {
-*//*                if (employee.BossId == null)
+                if (employee.BossId == null)
                 {
                     employee.Boss = new Employee { Name = "", Secondname = "", Surname = "" };
-                }*//*
-                _context.Add(employee);
-                await _context.SaveChangesAsync();
+                }
+                _context.AddEmployee(employee);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BossId"] = new SelectList(_context.Employees, "Id", "Id", employee.BossId);
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", employee.DepartmentId);
-            ViewData["PositionId"] = new SelectList(_context.Positions, "Id", "Id", employee.PositionId);
+            ViewData["BossId"] = new SelectList(_context.FetchAllEmployees(), "Id", "Id", employee.BossId);
+            ViewData["DepartmentId"] = new SelectList(_context.FetchAllDepartments(), "Id", "Id", employee.DepartmentId);
+            ViewData["PositionId"] = new SelectList(_context.FetchAllPositions(), "Id", "Id", employee.PositionId);
             return View(employee);
-        }*/
+        }
 
 
         // GET: Employees/Edit/5

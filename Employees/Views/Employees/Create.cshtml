@@ -26,17 +26,17 @@
             <div asp-validation-summary="ModelOnly"></div>
             <div class="field">
                 <label asp-for="Name"></label>
-                <input asp-for="Name" style="width: 30%"/>
+                <input asp-for="Name" style="width: 30%" />
                 <span asp-validation-for="Name"></span>
             </div>
             <div class="field">
                 <label asp-for="Secondname"></label>
-                <input asp-for="Secondname" style="width: 30%"/>
+                <input asp-for="Secondname" style="width: 30%" />
                 <span asp-validation-for="Secondname"></span>
             </div>
             <div class="field">
                 <label asp-for="Surname"></label>
-                <input asp-for="Surname" style="width: 30%"/>
+                <input asp-for="Surname" style="width: 30%" />
                 <span asp-validation-for="Surname"> </span>
             </div>
             <div class="field">
@@ -50,6 +50,11 @@
             <div class="field">
                 <label asp-for="DepartmentId"></label>
                 <select asp-for="DepartmentId" asp-items="ViewBag.Department"></select>
+            </div>
+            <div class="field">
+                <label asp-for="RecruitDate"></label>
+                <input type="date" asp-for="RecruitDate" style="width: 10%" />
+                <span asp-validation-for="RecruitDate"></span>
             </div>
             <div class="field">
                 <input type="submit" value="Создать" />

@@ -27,20 +27,41 @@ namespace Employees.Data
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
-                var cmd = new SqlCommand("FetchEmployeeById", connect);
+                var cmd = new SqlCommand("FetchEmployeeById", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("@Id", id);
                 var reader = cmd.ExecuteReader();
-                reader.Read();
-                e = new Employee()
+                while (reader.Read())
                 {
-                    Id = (int)reader.GetValue(0),
-                    Name = (string)reader.GetValue(1),
-                    Secondname = (string)reader.GetValue(2),
-                    Surname = (string)reader.GetValue(3),
-                    BossId = (int)reader.GetValue(4),
-                    PositionId = (int)reader.GetValue(5),
-                    DepartmentId = (int)reader.GetValue(6)
-                };
+                    e = new Employee()
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = (string)reader.GetString(1),
+                        Secondname = reader.GetString(2),
+                        Surname = reader.GetString(3),
+                        BossId = (Convert.IsDBNull(reader.GetValue(4))) ? (null) : ((int?)reader.GetValue(4)),
+                        Boss = new Employee
+                        {
+                            //Id = (int)reader.GetValue(4),
+                            Surname = reader.GetString(5)
+                        },
+                        PositionId = reader.GetInt32(6),
+                        Position = new Position
+                        {
+                            Id = reader.GetInt32(6),
+                            Name = reader.GetString(7)
+                        },
+                        DepartmentId = reader.GetInt32(8),
+                        Department = new Department
+                        {
+                            Id = reader.GetInt32(8),
+                            Name = reader.GetString(9)
+                        },
+                        RecruitDate = reader.GetDateTime(10)
+                    };
+                }
             }
             return e;
         }
@@ -56,15 +77,20 @@ namespace Employees.Data
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
-                var cmd = new SqlCommand("FetchDepartmentById", connect);
+                var cmd = new SqlCommand("FetchDepartmentById", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("@Id", id);
                 var reader = cmd.ExecuteReader();
-                reader.Read();
-                d = new Department()
+                while (reader.Read())
                 {
-                    Id = (int)reader.GetValue(0),
-                    Name = (string)reader.GetValue(1),
-                };
+                    d = new Department()
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                    };
+                }
             }
             return d;
         }
@@ -80,22 +106,27 @@ namespace Employees.Data
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
-                var cmd = new SqlCommand("FetchDepartmentById", connect);
+                var cmd = new SqlCommand("FetchPositionById", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("@Id", id);
                 var reader = cmd.ExecuteReader();
-                reader.Read();
-                p = new Position()
+                while (reader.Read())
                 {
-                    Id = (int)reader.GetValue(0),
-                    Name = (string)reader.GetValue(1),
-                };
+                    p = new Position()
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = reader.GetString(1),
+                    };
+                }
             }
             return p;
         }
 
         public IList<Employee> FetchAllEmployees()
         {
-            int cnt = 0;
+            int cnt = 1;
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
@@ -104,8 +135,10 @@ namespace Employees.Data
                     CommandType = CommandType.StoredProcedure
                 };
                 var reader = cmd.ExecuteReader();
-                reader.Read();
-                cnt = (int)reader.GetValue(0);
+                while (reader.Read())
+                {
+                    cnt = reader.GetInt32(0);
+                }
             }
 
             return FetchEmployeesRange(cnt, 1);
@@ -128,8 +161,8 @@ namespace Employees.Data
                     departments.Add(
                         new Department()
                         {
-                            Id = (int)reader.GetValue(0),
-                            Name = (string)reader.GetValue(1)
+                            Id = reader.GetInt32(0),
+                            Name = reader.GetString(1)
                         });
                 }
             }
@@ -154,8 +187,8 @@ namespace Employees.Data
                     positions.Add(
                         new Position()
                         {
-                            Id = (int)reader.GetValue(0),
-                            Name = (string)reader.GetValue(1)
+                            Id = reader.GetInt32(0),
+                            Name = reader.GetString(1)
                         });
                 }
             }
@@ -171,6 +204,10 @@ namespace Employees.Data
         public IList<Employee> FetchEmployeesRange(int fetchNum, int pageNum)
         {
             IList<Employee> employees = new List<Employee>();
+            if (fetchNum == 0)
+            {
+                return employees;
+            }
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
@@ -187,22 +224,31 @@ namespace Employees.Data
                     employees.Add(
                         new Employee()
                         {
-                            Id = (int)reader.GetValue(0),
-                            Name = (string)reader.GetValue(1),
-                            Secondname = (string)reader.GetValue(2),
-                            Surname = (string)reader.GetValue(3),
-                            BossId = (int)reader.GetValue(4),
-                            PositionId = (int)reader.GetValue(5),
-                            DepartmentId = (int)reader.GetValue(6)
+                            Id = reader.GetInt32(0),
+                            Name = (string)reader.GetString(1),
+                            Secondname = reader.GetString(2),
+                            Surname = reader.GetString(3),
+                            BossId = (Convert.IsDBNull(reader.GetValue(4))) ? (null) : ((int?)reader.GetValue(4)),
+                            Boss = new Employee
+                            {
+                                //Id = (int)reader.GetValue(4),
+                                Surname = reader.GetString(5)
+                            },
+                            PositionId = reader.GetInt32(6),
+                            Position = new Position
+                            {
+                                Id = reader.GetInt32(6),
+                                Name = reader.GetString(7)
+                            },
+                            DepartmentId = reader.GetInt32(8),
+                            Department = new Department
+                            {
+                                Id = reader.GetInt32(8),
+                                Name = reader.GetString(9)
+                            },
+                            RecruitDate = reader.GetDateTime(10)
                         });
                 }
-            }
-
-            foreach (var e in employees)
-            {
-                e.Boss = FetchEmployeeById(e.BossId);
-                e.Position = FetchPositionById(e.PositionId);
-                e.Department = FetchDepartmentById(e.DepartmentId);
             }
 
             return employees;
@@ -294,13 +340,13 @@ namespace Employees.Data
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
-                var cmd = new SqlCommand("AddEmployee") { CommandType = CommandType.StoredProcedure };
+                var cmd = new SqlCommand("AddEmployee", connect) { CommandType = CommandType.StoredProcedure };
                 cmd.Parameters.AddWithValue("@Name", e.Name);
                 cmd.Parameters.AddWithValue("@Secondname", e.Secondname);
                 cmd.Parameters.AddWithValue("@Surname", e.Surname);
-                cmd.Parameters.AddWithValue("@BossId", e.Boss.Id);
-                cmd.Parameters.AddWithValue("@PosId", e.Position.Id);
-                cmd.Parameters.AddWithValue("@DepId", e.Department.Id);
+                cmd.Parameters.AddWithValue("@BossId", e.BossId ?? Convert.DBNull).IsNullable = true;
+                cmd.Parameters.AddWithValue("@PosId", e.PositionId);
+                cmd.Parameters.AddWithValue("@DepId", e.DepartmentId);
                 cmd.ExecuteNonQuery();
             }
         }

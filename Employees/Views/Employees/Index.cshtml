@@ -30,6 +30,9 @@
                 @Html.DisplayNameFor(model => model.Boss)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.RecruitDate)
+            </th>
+            <th>
                 Действия
             </th>
         </tr>
@@ -37,7 +40,6 @@
     <tbody>
         @foreach (var item in Model)
         {
-            var bossSurname = (item.Boss == null) ? ("") : (item.Boss.Surname);
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
@@ -55,12 +57,15 @@
                     @Html.DisplayFor(modelItem => item.Department.Name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => bossSurname)
+                    @Html.DisplayFor(modelItem => item.Boss.Surname)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    @Html.DisplayFor(modelItem => item.RecruitDate)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Изменить</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                    <a asp-action="" asp-route-id="@item.Id">Руководители</a>
                 </td>
             </tr>
         }
