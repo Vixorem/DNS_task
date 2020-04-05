@@ -11,59 +11,48 @@
 
         div.field label {
             display: block;
-            float: left;
-            width: 70px;
-            height: 15px;
         }
 </style>
 
 
 <h4 align="center">Добавить нового сотрудинка</h4>
-<hr />
 <div>
     <div align="center">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly"></div>
+        <form id="createForm">
             <div class="field">
-                <label asp-for="Name"></label>
-                <input asp-for="Name" style="width: 30%" />
-                <span asp-validation-for="Name"></span>
+                <label>Имя</label>
+                <input id="name" style="width: 30%" />
             </div>
             <div class="field">
-                <label asp-for="Secondname"></label>
-                <input asp-for="Secondname" style="width: 30%" />
-                <span asp-validation-for="Secondname"></span>
+                <label>Отчество</label>
+                <input id="secondname" style="width: 30%" />
             </div>
             <div class="field">
-                <label asp-for="Surname"></label>
-                <input asp-for="Surname" style="width: 30%" />
-                <span asp-validation-for="Surname"> </span>
+                <label>Фамилия</label>
+                <input id="surname" style="width: 30%" />
             </div>
             <div class="field">
-                <label asp-for="BossId"></label>
-                <select asp-for="BossId" asp-items="ViewBag.Boss"></select>
+                <label>Руководитель</label>
+                <select id="bossSelection"></select>
             </div>
             <div class="field">
-                <label asp-for="PositionId"></label>
-                <select asp-for="PositionId" asp-items="ViewBag.Position"></select>
+                <label>Должность</label>
+                <select id="positionSelection"></select>
             </div>
             <div class="field">
-                <label asp-for="DepartmentId"></label>
-                <select asp-for="DepartmentId" asp-items="ViewBag.Department"></select>
+                <label>Отдел</label>
+                <select id="departmentSelection"></select>
             </div>
             <div class="field">
-                <label asp-for="RecruitDate"></label>
-                <input type="date" asp-for="RecruitDate" style="width: 10%" />
-                <span asp-validation-for="RecruitDate"></span>
+                <label>Дата трудоустройства</label>
+                <input id="recdate" type="date" style="width: 30%" />
             </div>
             <div class="field">
-                <input type="submit" value="Создать" />
+                <input id="create" type="submit" value="Создать" />
             </div>
         </form>
     </div>
+    <a id="cancel" href="" style="text-decoration: none">Отмена</a>
 </div>
 
-<div>
-    <a asp-action="Index">Назад</a>
-</div>
 

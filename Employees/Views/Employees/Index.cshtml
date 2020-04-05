@@ -4,70 +4,94 @@
     ViewData["Title"] = "Главная";
 }
 
+
+<style>
+    .button {
+        background: #E0FFFF;
+        color: black;
+        text-decoration: none;
+    }
+
+    .addButton {
+        background: #b2ff5c;
+        color: black;
+        text-decoration: none;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    .editButton {
+        background: #2cafd6;
+        color: black;
+        text-decoration: none;
+    }
+
+    .bossesButton {
+        background: #7f94ba;
+        color: black;
+        text-decoration: none;
+    }
+
+    .deleteButton {
+        background: #FA8072;
+        color: black;
+        text-decoration: none;
+    }
+
+    .theadstyle,
+    .tfootstyle {
+        background-color: #3f87a6;
+        color: #fff;
+    }
+
+    .tbodystyle {
+        background-color: #e4f0f5;
+    }
+
+    .tdstyle {
+        text-align: center;
+    }
+
+
+    .captionstyle {
+        padding: 10px;
+        caption-side: bottom;
+    }
+
+    .tablestyle {
+        border-collapse: collapse;
+        border: 2px solid rgb(200, 200, 200);
+        letter-spacing: 1px;
+        font-family: sans-serif;
+        font-size: .8rem;
+    }
+
+    .tdstyle,
+    .thstyle {
+        border: 1px solid rgb(190, 190, 190);
+        padding: 5px 10px;
+    }
+
+    tr {
+        vertical-align: top;
+    }
+</style>
+
 <h2 align="center">Данные о сотрудниках</h2>
-<p>
-    <a asp-action="Create">Добавить</a>
-</p>
-<table align="center">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Surname)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Surname)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Position)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Department)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Boss)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RecruitDate)
-            </th>
-            <th>
-                Действия
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Secondname)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Surname)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Position.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Department.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Boss.Surname)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.RecruitDate)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Изменить</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Удалить</a> |
-                    <a asp-action="" asp-route-id="@item.Id">Руководители</a>
-                </td>
-            </tr>
-        }
-    </tbody>
+<span align="left">
+    <a id="add" class="addButton">Добавить</a>
+</span>
+<table align="left">
+    <tr>
+        <th style="width: 50%">
+            <div id="empTable">
+            </div>
+        </th>
+        <th>
+            <div id="appearingLayout">
+            </div>
+        </th>
+    </tr>
 </table>

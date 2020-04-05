@@ -335,6 +335,54 @@ namespace Employees.Data
             }
         }
 
+        // Не очень хороший вариант,
+        // т.к. если работать с бд будут много пользователей, то могут быть косяки
+        public Employee FetchLastEmployee()
+        {
+            Employee e = null;
+
+            using (var connect = new SqlConnection(connectionStr))
+            {
+                connect.Open();
+                var cmd = new SqlCommand("FetchLastEmployee", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    e = new Employee()
+                    {
+                        Id = reader.GetInt32(0),
+                        Name = (string)reader.GetString(1),
+                        Secondname = reader.GetString(2),
+                        Surname = reader.GetString(3),
+                        BossId = (Convert.IsDBNull(reader.GetValue(4))) ? (null) : ((int?)reader.GetValue(4)),
+                        Boss = new Employee
+                        {
+                            //Id = (int)reader.GetValue(4),
+                            Surname = reader.GetString(5)
+                        },
+                        PositionId = reader.GetInt32(6),
+                        Position = new Position
+                        {
+                            Id = reader.GetInt32(6),
+                            Name = reader.GetString(7)
+                        },
+                        DepartmentId = reader.GetInt32(8),
+                        Department = new Department
+                        {
+                            Id = reader.GetInt32(8),
+                            Name = reader.GetString(9)
+                        },
+                        RecruitDate = reader.GetDateTime(10)
+                    };
+                }
+            }
+
+            return e;
+        }
+
         public void AddEmployee(Employee e)
         {
             using (var connect = new SqlConnection(connectionStr))

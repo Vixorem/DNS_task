@@ -9,7 +9,7 @@ namespace Employees.Models
 {
     public class Employee
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Display(Name = "Имя")]
         [StringLength(50)]
