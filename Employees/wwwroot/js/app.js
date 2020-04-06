@@ -1,9 +1,9 @@
 $(function () {
-    EmpRequest.GetEmployees(EmpRequest.SetUpEmployees);
+    EmpRequest.GetEmployees(DocManager.SetUpEmployees);
     $("#add").click(function (event) {
         event.preventDefault();
         console.log("#add clicked");
-        EmpRequest.GetCreate();
+        EmpRequest.GetCreate(DocManager.SetUpCreate);
     });
 });
 var Position = /** @class */ (function () {
@@ -24,7 +24,220 @@ var Employee = /** @class */ (function () {
 var EmpRequest = /** @class */ (function () {
     function EmpRequest() {
     }
-    EmpRequest.SetUpEmployees = function (data) {
+    EmpRequest.PostEdit = function (id) {
+    };
+    EmpRequest.GetEmployees = function (f) {
+        console.log("GET request for LoadEmployees()");
+        $.getJSON("/Employees/GetEmployees", function (data) {
+        }).done(function (data) {
+            console.log("GET succeed");
+            f(data);
+        }).fail(function (data) {
+            console.log("GET failed");
+        });
+    };
+    EmpRequest.GetEdit = function (f, id) {
+        console.log("GET request for Edit()");
+        $("#appearingLayout").load("Employees/Edit/", function () {
+            console.log("GET succeed");
+            $("#cancel").click(function (event) {
+                event.preventDefault();
+                console.log("#cancel clicked");
+                DocManager.RemoveAppearingHtml();
+            });
+            $("#delete").click(function (event) {
+                event.preventDefault();
+                console.log("#edit clicked");
+                EmpRequest.PostEdit(id);
+            });
+            f(id);
+        });
+    };
+    EmpRequest.GetBosses = function (f, ref) {
+        console.log("GET request for LoadBosses()");
+        $.getJSON(ref, function (data) {
+        }).done(function (data) {
+            console.log("GET succeed");
+            f();
+        }).fail(function (data) {
+            console.log("GET failed");
+        });
+    };
+    EmpRequest.GetCreate = function (f) {
+        console.log("GET request for GetSelections()");
+        $.getJSON("Employees/GetSelections/", function (data) {
+        }).done(function (data) {
+            console.log("GET succeed");
+            $("#appearingLayout").load("Employees/Create", function () {
+                $("#cancel").click(function (event) {
+                    event.preventDefault();
+                    console.log("#cancel clicked");
+                    DocManager.RemoveAppearingHtml();
+                });
+                $("#create").click(function (event) {
+                    event.preventDefault();
+                    console.log("#create clicked");
+                    EmpRequest.PostCreate();
+                });
+                f(data);
+            });
+        }).fail(function (data) {
+            console.log("GET failed");
+        });
+    };
+    EmpRequest.PostCreate = function () {
+        console.log("POST to Create");
+        var emp = new Employee();
+        var bossSelect = document.getElementById("bossSelection");
+        var posSelect = document.getElementById("positionSelection");
+        var depSelect = document.getElementById("departmentSelection");
+        emp.Id = null;
+        emp.Name = document.getElementById("name").value;
+        emp.Secondname = document.getElementById("secondname").value;
+        emp.Surname = document.getElementById("surname").value;
+        emp.BossId = Number(bossSelect[bossSelect.selectedIndex].value);
+        emp.PositionId = Number(posSelect[posSelect.selectedIndex].value);
+        emp.DepartmentId = Number(depSelect[depSelect.selectedIndex].value);
+        emp.Boss = null;
+        emp.Position = null;
+        emp.Department = null;
+        var date = new Date(document.getElementById("recdate").value);
+        emp.RecruitDate = date.toISOString();
+        $.ajax({
+            type: "POST",
+            url: "Employees/Create/",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(emp),
+            success: function (response) {
+                if (response.success) {
+                    console.log("POST succeed");
+                    DocManager.RemoveAppearingHtml();
+                    //TODO: если по пагинации норм, то вставить
+                }
+                else {
+                    alert("Сервер не смог обработать запрос, " +
+                        "возможно, перезагрузка страницы cможет помочь");
+                    console.log("Controller returned error");
+                }
+            },
+            error: function (response) {
+                console.log("POST failed");
+            }
+        });
+    };
+    EmpRequest.GetDelete = function (f, id) {
+        console.log("GET request for Delete()");
+        $("#appearingLayout").load("Employees/Delete/", function () {
+            console.log("GET succeed");
+            $("#cancel").click(function (event) {
+                event.preventDefault();
+                console.log("#cancel clicked");
+                DocManager.RemoveAppearingHtml();
+            });
+            $("#delete").click(function (event) {
+                event.preventDefault();
+                console.log("#delete clicked");
+                EmpRequest.PostDelete(id);
+            });
+            f(id);
+        });
+    };
+    EmpRequest.PostDelete = function (id) {
+        console.log("POST to Delete()");
+        $.ajax({
+            type: "POST",
+            url: "Employees/DeleteConfirmed/" + id,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(id),
+            success: function (response) {
+                if (response.success) {
+                    console.log("POST succeed");
+                    DocManager.RemoveAppearingHtml();
+                }
+                else {
+                    alert("Сервер не смог обработать запрос, " +
+                        "возможно, перезагрузка страницы cможет помочь");
+                    console.log("Controller returned error");
+                }
+            },
+            error: function (response) {
+                console.log("POST failed");
+            }
+        });
+    };
+    EmpRequest.tableHeaders = [
+        "Имя",
+        "Отчество",
+        "Фамилия",
+        "Должность",
+        "Отдел",
+        "Руководитель",
+        "Дата трудоустройства",
+        "Действия",
+    ];
+    return EmpRequest;
+}());
+var DocManager = /** @class */ (function () {
+    function DocManager() {
+    }
+    DocManager.RemoveAppearingHtml = function () {
+        document.getElementById("appearingLayout").innerHTML = "";
+    };
+    DocManager.SetUpCreate = function (data) {
+        var bosses = data["bosses"];
+        var positions = data["positions"];
+        var departments = data["departments"];
+        for (var i = 0; i < bosses.length; ++i) {
+            var opt = document.createElement("option");
+            opt.value = String(bosses[i].id);
+            opt.textContent = bosses[i].surname;
+            $("#bossSelection").append(opt);
+        }
+        for (var i = 0; i < positions.length; ++i) {
+            var opt = document.createElement("option");
+            opt.value = String(positions[i].id);
+            opt.textContent = positions[i].name;
+            $("#positionSelection").append(opt);
+        }
+        for (var i = 0; i < departments.length; ++i) {
+            var opt = document.createElement("option");
+            opt.value = String(departments[i].id);
+            opt.textContent = departments[i].name;
+            $("#departmentSelection").append(opt);
+        }
+        var today = new Date();
+        var date = document.getElementById("recdate");
+        var y = today.getFullYear();
+        var m = (String(today.getMonth()).length == 1) ? ("0" + today.getMonth()) : (today.getMonth());
+        var d = (String(today.getDate()).length == 1) ? ("0" + today.getDate()) : (today.getDate());
+        date.value = y + "-" + m + "-" + d;
+    };
+    DocManager.SetUpBosses = function () {
+    };
+    DocManager.SetUpDelete = function (id) {
+        var children = $("#" + id).children();
+        var name = children[0].textContent;
+        var secondname = children[1].textContent;
+        var surname = children[2].textContent;
+        var pos = children[3].textContent;
+        var dep = children[4].textContent;
+        $("#info").text(name
+            + " " + secondname + " " + surname +
+            " " + "(" + dep + ", " + pos + ")");
+    };
+    DocManager.SetUpEdit = function (id) {
+        var children = $("#" + id).children();
+        var name = children[0].textContent;
+        var secondname = children[1].textContent;
+        var surname = children[2].textContent;
+        var posId = $(children[3]).val();
+        var depId = children[4].attr("value");
+        var bossId = children[5].attr("value");
+        var date = children[6].attr("value");
+    };
+    DocManager.SetUpEmployees = function (data) {
         var table = document.createElement("table");
         table.className = "tablestyle";
         var thead = document.createElement("thead");
@@ -42,7 +255,7 @@ var EmpRequest = /** @class */ (function () {
         var tbody = document.createElement("tbody");
         for (var i = 0; i < data.length; ++i) {
             tr = document.createElement("tr");
-            tr.id = "tr" + String(data[i].id);
+            tr.id = String(data[i].id);
             var td1 = document.createElement("td");
             td1.className = "tdstyle";
             td1.textContent = data[i].name;
@@ -66,7 +279,11 @@ var EmpRequest = /** @class */ (function () {
             td6.textContent = data[i].boss.surname;
             var td7 = document.createElement("td");
             td7.className = "tdstyle";
-            td7.textContent = data[i].recruitDate;
+            var date = new Date(data[i].recruitDate);
+            var y = date.getFullYear();
+            var m = (String(date.getMonth()).length == 1) ? ("0" + date.getMonth()) : (date.getMonth());
+            var d = (String(date.getDate()).length == 1) ? ("0" + date.getDate()) : (date.getDate());
+            td7.textContent = d + "." + m + "." + y;
             var td8 = document.createElement("td");
             td8.className = "tdstyle";
             var a1 = document.createElement("a");
@@ -75,7 +292,7 @@ var EmpRequest = /** @class */ (function () {
             a1.textContent = "Изменить";
             a1.addEventListener("click", function (e) {
                 e.preventDefault();
-                EmpRequest.GetEdit(EmpRequest.SetUpEdit, a1.href);
+                EmpRequest.GetEdit(DocManager.SetUpEdit, id);
             }, false);
             var a2 = document.createElement("a");
             a2.className = "bossesButton";
@@ -83,16 +300,16 @@ var EmpRequest = /** @class */ (function () {
             a2.textContent = "Руководители";
             a2.addEventListener("click", function (e) {
                 e.preventDefault();
-                EmpRequest.GetBosses(EmpRequest.SetUpEdit, a2.href);
+                EmpRequest.GetBosses(DocManager.SetUpEdit, a2.href);
             }, false);
             var a3 = document.createElement("a");
             a3.className = "deleteButton";
-            a1.id = "dl" + String(data[i].id);
-            a3.href = "/Employees / Delete /" + data[i].id;
+            a3.href = "/Employees/Delete/" + data[i].id;
             a3.textContent = "Удалить";
+            var id = data[i].id;
             a3.addEventListener("click", function (e) {
                 e.preventDefault();
-                EmpRequest.SetUpDelete(a3.href);
+                EmpRequest.GetDelete(DocManager.SetUpDelete, id);
             }, false);
             var tr21 = document.createElement("tr");
             var tr22 = document.createElement("tr");
@@ -122,146 +339,6 @@ var EmpRequest = /** @class */ (function () {
         table.appendChild(tbody);
         $("#empTable").html(table);
     };
-    EmpRequest.GetEmployees = function (f) {
-        console.log("GET request for LoadEmployees()");
-        $.getJSON("/Employees/GetEmployees", function (data) {
-        }).done(function (data) {
-            console.log("GET succeed");
-            f(data);
-        }).fail(function (data) {
-            console.log("GET failed");
-        });
-    };
-    EmpRequest.SetUpDelete = function (ref) {
-    };
-    EmpRequest.SetUpEdit = function () {
-    };
-    EmpRequest.GetEdit = function (f, ref) {
-        console.log("GET request for LoadEdit()");
-        $.getJSON(ref, function (data) {
-        }).done(function (data) {
-            console.log("GET succeed");
-            f();
-        }).fail(function (data) {
-            console.log("GET failed");
-        });
-    };
-    EmpRequest.GetBosses = function (f, ref) {
-        console.log("GET request for LoadBosses()");
-        $.getJSON(ref, function (data) {
-        }).done(function (data) {
-            console.log("GET succeed");
-            f();
-        }).fail(function (data) {
-            console.log("GET failed");
-        });
-    };
-    EmpRequest.SetUpBosses = function () {
-    };
-    EmpRequest.GetCreate = function () {
-        console.log("GET request for GetSelections()");
-        $.getJSON("Employees/GetSelections/", function (data) {
-        }).done(function (data) {
-            console.log("GET succeed");
-            $("#appearingLayout").load("Employees/Create", function () {
-                $("#cancel").click(function (event) {
-                    event.preventDefault();
-                    console.log("#cancel clicked");
-                    EmpRequest.RemoveAppearingHtml();
-                });
-                $("#create").click(function (event) {
-                    event.preventDefault();
-                    console.log("#create clicked");
-                    EmpRequest.PostCreate();
-                });
-                EmpRequest.SetUpCreate(data);
-            });
-        }).fail(function (data) {
-            console.log("GET failed");
-        });
-    };
-    EmpRequest.SetUpCreate = function (data) {
-        var bosses = data["bosses"];
-        var positions = data["positions"];
-        var departments = data["departments"];
-        for (var i = 0; i < bosses.length; ++i) {
-            var opt = document.createElement("option");
-            opt.value = String(bosses[i].id);
-            opt.textContent = bosses[i].surname;
-            $("#bossSelection").append(opt);
-        }
-        for (var i = 0; i < positions.length; ++i) {
-            var opt = document.createElement("option");
-            opt.value = String(positions[i].id);
-            opt.textContent = positions[i].name;
-            $("#positionSelection").append(opt);
-        }
-        for (var i = 0; i < departments.length; ++i) {
-            var opt = document.createElement("option");
-            opt.value = String(departments[i].id);
-            opt.textContent = departments[i].name;
-            $("#departmentSelection").append(opt);
-        }
-        var today = new Date();
-        var date = document.getElementById("recdate");
-        var y = today.getFullYear();
-        var m = (String(today.getMonth()).length == 1) ? ("0" + today.getMonth()) : (today.getMonth());
-        var d = (String(today.getDate()).length == 1) ? ("0" + today.getDate()) : (today.getDate());
-        date.value = y + "-" + m + "-" + d;
-    };
-    EmpRequest.PostCreate = function () {
-        console.log("POST to Create");
-        var emp = new Employee();
-        var bossSelect = document.getElementById("bossSelection");
-        var posSelect = document.getElementById("positionSelection");
-        var depSelect = document.getElementById("departmentSelection");
-        emp.Id = null;
-        emp.Name = document.getElementById("name").value;
-        emp.Secondname = document.getElementById("secondname").value;
-        emp.Surname = document.getElementById("surname").value;
-        emp.BossId = Number(bossSelect[bossSelect.selectedIndex].value);
-        emp.PositionId = Number(posSelect[posSelect.selectedIndex].value);
-        emp.DepartmentId = Number(depSelect[depSelect.selectedIndex].value);
-        emp.Boss = null;
-        emp.Position = null;
-        emp.Department = null;
-        var date = new Date(document.getElementById("recdate").value);
-        emp.RecruitDate = date.toISOString();
-        $.ajax({
-            type: "POST",
-            url: "Employees/Create/",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(emp),
-            success: function (response) {
-                if (response.success) {
-                    console.log("POST succeed");
-                    EmpRequest.RemoveAppearingHtml();
-                }
-                else {
-                    alert("Сервер не смог обработать запрос, " +
-                        "возможно, перезагрузка страницы cможет помочь");
-                    console.log("Controller returned error");
-                }
-            },
-            error: function (response) {
-                console.log("POST failed");
-            }
-        });
-    };
-    EmpRequest.RemoveAppearingHtml = function () {
-        document.getElementById("appearingLayout").innerHTML = "";
-    };
-    EmpRequest.tableHeaders = [
-        "Имя",
-        "Отчество",
-        "Фамилия",
-        "Должность",
-        "Отдел",
-        "Руководитель",
-        "Дата трудоустройства",
-        "Действия",
-    ];
-    return EmpRequest;
+    return DocManager;
 }());
 //# sourceMappingURL=app.js.map

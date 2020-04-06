@@ -4,50 +4,45 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>Employee</h4>
+<h4>Редактировать</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div>
+    <div align="center">
+        <form id="createForm">
+            <div class="field">
+                <label>Имя</label>
+                <input id="name" style="width: 30%" />
             </div>
-            <div class="form-group">
-                <label asp-for="Secondname" class="control-label"></label>
-                <input asp-for="Secondname" class="form-control" />
-                <span asp-validation-for="Secondname" class="text-danger"></span>
+            <div class="field">
+                <label>Отчество</label>
+                <input id="secondname" style="width: 30%" />
             </div>
-            <div class="form-group">
-                <label asp-for="Surname" class="control-label"></label>
-                <input asp-for="Surname" class="form-control" />
-                <span asp-validation-for="Surname" class="text-danger"></span>
+            <div class="field">
+                <label>Фамилия</label>
+                <input id="surname" style="width: 30%" />
             </div>
-            <div class="form-group">
-                <label asp-for="BossId" class="control-label"></label>
-                <select asp-for="BossId" class="form-control" asp-items="ViewBag.BossId"></select>
-                <span asp-validation-for="BossId" class="text-danger"></span>
+            <div class="field">
+                <label>Руководитель</label>
+                <select id="bossSelection"></select>
             </div>
-            <div class="form-group">
-                <label asp-for="PositionId" class="control-label"></label>
-                <select asp-for="PositionId" class="form-control" asp-items="ViewBag.PositionId"></select>
-                <span asp-validation-for="PositionId" class="text-danger"></span>
+            <div class="field">
+                <label>Должность</label>
+                <select id="positionSelection"></select>
             </div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label"></label>
-                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
-                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+            <div class="field">
+                <label>Отдел</label>
+                <select id="departmentSelection"></select>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="field">
+                <label>Дата трудоустройства</label>
+                <input id="recdate" type="date" style="width: 30%" />
+            </div>
+            <div class="field">
+                <input id="edit" type="submit" value="Изменить" />
             </div>
         </form>
     </div>
+    <a id="cancel" href="" style="text-decoration: none">Отмена</a>
 </div>
 
 <div>

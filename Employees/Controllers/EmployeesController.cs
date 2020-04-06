@@ -14,26 +14,50 @@ namespace Employees.Controllers
         private readonly EmployeeContext _context = new EmployeeContext();
         private readonly int fetchSiz = 10;
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             return View();
         }
 
+        [HttpGet]
         public IActionResult GetEmployees()
         {
             var employeeContext = _context.FetchEmployeesRange(fetchSiz, 1);
             return Json(employeeContext);
         }
 
-        public IActionResult Edit(int? id)
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            return PartialView();
+        }
+
+        public IActionResult GetEmployee(int id)
+        {
+            if (EmployeeExists(id) == false)
+            {
+                return Json(new
+                {
+                    success = true,
+                    responseText = "The employee never existed or already removed"
+                });
+            }
+
+            var emp = _context.FetchEmployeeById(id);
+
+            return Json(new
+            {
+                success = true,
+                employee = emp
+            });
+        }
+
+        [HttpPost]
+        public IActionResult EditConfirmed(int id)
         {
 
-            var employee = _context.FetchEmployeeById(id);
-            if (employee == null)
-            {
-                return null;
-            }
-            return Json(employee);
+            return null;
         }
 
         public IActionResult GetSelections()
@@ -69,7 +93,10 @@ namespace Employees.Controllers
         [HttpPost]
         public IActionResult Create([FromBody]  Employee employee)
         {
-            //TODO: доделать это, когда разберусь с пагинацией
+            /*
+             Если на текущей страницы есть место, чтобы добавить запись,
+             то, после подтверждения, добавляем ее сами на клиенте
+             */
             if (employee == null)
             {
                 return Json(new
@@ -85,14 +112,27 @@ namespace Employees.Controllers
             {
                 success = true,
                 created = emp
-            }); ;
+            });
         }
 
         [HttpPost]
         public IActionResult DeleteConfirmed(int id)
         {
-            //TODO
-            return null;
+            if (EmployeeExists(id) == false)
+            {
+                return Json(new
+                {
+                    success = true,
+                    responseText = "The employee never existed or already removed"
+                });
+            }
+
+            _context.DeleteEmployee(id);
+
+            return Json(new
+            {
+                success = true,
+            });
         }
 
         private bool EmployeeExists(int id)

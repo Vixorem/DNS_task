@@ -77,21 +77,39 @@
     tr {
         vertical-align: top;
     }
+
+    .pagination {
+        color: black;
+        float: left;
+        padding: 8px 16px;
+        text-decoration: none;
+    }
 </style>
 
 <h2 align="center">Данные о сотрудниках</h2>
 <span align="left">
     <a id="add" class="addButton">Добавить</a>
 </span>
-<table align="left">
-    <tr>
-        <th style="width: 50%">
-            <div id="empTable">
-            </div>
-        </th>
-        <th>
-            <div id="appearingLayout">
-            </div>
-        </th>
-    </tr>
-</table>
+<div>
+    <table align="left">
+        <tr>
+            <th style="width: 50%">
+                <div id="empTable">
+                </div>
+            </th>
+            <th>
+                <div id="appearingLayout">
+                </div>
+            </th>
+        </tr>
+    </table>
+</div>
+<div class="item-list">
+    <ul class="pager">
+        <li class="pager-current first"><span>1</span></li>
+        <li class="pager-item"><a href="/node?page=1" title="На страницу номер 2">2</a></li>
+        <li class="pager-item"><a href="/node?page=2" title="На страницу номер 3">3</a></li>
+        <li class="pager-item"><a href="/node?page=3" title="На страницу номер 4">4</a></li>
+        <li class="pager-next last"><a href="/node?page=1" title="На следующую страницу">›</a></li>
+    </ul>
+</div>

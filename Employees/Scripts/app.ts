@@ -4,10 +4,12 @@
     $("#add").click(function (event) {
         event.preventDefault();
         console.log("#add clicked");
-        EmpRequest.GetCreate();
+        EmpRequest.GetCreate(DocManager.SetUpCreate);
     });
 
 });
+
+//TODO: делаем редактирование
 
 class Position {
     Id: number;
@@ -47,7 +49,9 @@ class EmpRequest {
         "Действия",
     ];
 
+    static PostEdit(id): void {
 
+    }
 
     static GetEmployees(f: Function): void {
         console.log("GET request for LoadEmployees()");
@@ -62,15 +66,21 @@ class EmpRequest {
 
     }
 
-    static GetEdit(f: Function, ref: string): void {
-        console.log("GET request for LoadEdit()");
-        $.getJSON(ref, function (data) {
-
-        }).done(function (data) {
+    static GetEdit(f: Function, id): void {
+        console.log("GET request for Edit()");
+        $("#appearingLayout").load("Employees/Edit/", function () {
             console.log("GET succeed");
-            f();
-        }).fail(function (data) {
-            console.log("GET failed");
+            $("#cancel").click(function (event) {
+                event.preventDefault();
+                console.log("#cancel clicked");
+                DocManager.RemoveAppearingHtml();
+            });
+            $("#delete").click(function (event) {
+                event.preventDefault();
+                console.log("#edit clicked");
+                EmpRequest.PostEdit(id);
+            });
+            f(id);
         });
     }
 
@@ -85,7 +95,7 @@ class EmpRequest {
         });
     }
 
-    static GetCreate(): void {
+    static GetCreate(f: Function): void {
         console.log("GET request for GetSelections()");
         $.getJSON("Employees/GetSelections/", function (data) {
 
@@ -102,7 +112,7 @@ class EmpRequest {
                     console.log("#create clicked");
                     EmpRequest.PostCreate();
                 });
-                DocManager.SetUpCreate(data);
+                f(data);
             });
         }).fail(function (data) {
             console.log("GET failed");
@@ -152,38 +162,32 @@ class EmpRequest {
         });
     }
 
-    static GetDelete(): void {
+    static GetDelete(f: Function, id): void {
         console.log("GET request for Delete()");
-        $.getJSON("Employees/Delete/", function (data) {
-
-        }).done(function (data) {
+        $("#appearingLayout").load("Employees/Delete/", function () {
             console.log("GET succeed");
-            $("#appearingLayout").load("Employees/Create", function () {
-                $("#cancel").click(function (event) {
-                    event.preventDefault();
-                    console.log("#cancel clicked");
-                    DocManager.RemoveAppearingHtml();
-                });
-                $("#delete").click(function (event) {
-                    event.preventDefault();
-                    console.log("#delete clicked");
-                    EmpRequest.PostDelete();
-                });
-                DocManager.SetUpCreate(data);
+            $("#cancel").click(function (event) {
+                event.preventDefault();
+                console.log("#cancel clicked");
+                DocManager.RemoveAppearingHtml();
             });
-        }).fail(function (data) {
-            console.log("GET failed");
+            $("#delete").click(function (event) {
+                event.preventDefault();
+                console.log("#delete clicked");
+                EmpRequest.PostDelete(id);
+            });
+            f(id);
         });
     }
 
-    static PostDelete(): void {
-
+    static PostDelete(id): void {
+        console.log("POST to Delete()");
         $.ajax({
             type: "POST",
-            url: "Employees/Create/",
+            url: "Employees/DeleteConfirmed/" + id,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            //data: JSON.stringify(id),
+            data: JSON.stringify(id),
             success: function (response) {
                 if (response.success) {
                     console.log("POST succeed");
@@ -244,10 +248,19 @@ class DocManager {
 
     }
 
-    static SetUpDelete(ref: string) {
+    static SetUpDelete(id) {
+        var children = $("#" + id).children();
+        var name = children[0].textContent;
+        var secondname = children[1].textContent;
+        var surname = children[2].textContent;
+        var pos = children[3].textContent;
+        var dep = children[4].textContent;
+        $("#info").text(name
+            + " " + secondname + " " + surname +
+            " " + "(" + dep + ", " + pos + ")");
     }
 
-    static SetUpEdit(): void {
+    static SetUpEdit(id): void {
 
     }
 
@@ -297,7 +310,11 @@ class DocManager {
             td6.textContent = data[i].boss.surname;
             var td7 = document.createElement("td");
             td7.className = "tdstyle";
-            td7.textContent = data[i].recruitDate;
+            var date = new Date(data[i].recruitDate);
+            var y = date.getFullYear();
+            var m = (String(date.getMonth()).length == 1) ? ("0" + date.getMonth()) : (date.getMonth());
+            var d = (String(date.getDate()).length == 1) ? ("0" + date.getDate()) : (date.getDate());
+            td7.textContent = d + "." + m + "." + y;
             var td8 = document.createElement("td");
             td8.className = "tdstyle";
             var a1 = document.createElement("a");
@@ -306,7 +323,7 @@ class DocManager {
             a1.textContent = "Изменить";
             a1.addEventListener("click", function (e) {
                 e.preventDefault();
-                EmpRequest.GetEdit(DocManager.SetUpEdit, a1.href);
+                EmpRequest.GetEdit(DocManager.SetUpEdit, id);
             }, false);
             var a2 = document.createElement("a");
             a2.className = "bossesButton";
@@ -318,14 +335,13 @@ class DocManager {
             }, false);
             var a3 = document.createElement("a");
             a3.className = "deleteButton";
-            a1.id = "dl" + String(data[i].id);
-            a3.href = "/Employees / Delete /" + data[i].id;
+            a3.href = "/Employees/Delete/" + data[i].id;
             a3.textContent = "Удалить";
+            var id = data[i].id;
             a3.addEventListener("click", function (e) {
                 e.preventDefault();
-                DocManager.SetUpDelete(a3.href);
+                EmpRequest.GetDelete(DocManager.SetUpDelete, id)
             }, false);
-
             var tr21 = document.createElement("tr");
             var tr22 = document.createElement("tr");
             var tr23 = document.createElement("tr");

@@ -16,6 +16,20 @@ namespace Employees.Data
             FirstInit();
         }
 
+        public void DeleteEmployee(int id)
+        {
+            using (var connect = new SqlConnection(connectionStr))
+            {
+                connect.Open();
+                var cmd = new SqlCommand("DeleteEmployee", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public Employee FetchEmployeeById(int? id)
         {
             Employee e = null;
@@ -287,6 +301,9 @@ namespace Employees.Data
                     c.Parameters.AddWithValue("@Name", "Закупка");
                     c.ExecuteNonQuery();
                     c.Parameters.Clear();
+                    c.Parameters.AddWithValue("@Name", "Бухгалтерия");
+                    c.ExecuteNonQuery();
+                    c.Parameters.Clear();
                     //------
                     c = new SqlCommand("AddPosition", connect) { CommandType = CommandType.StoredProcedure };
                     c.Parameters.AddWithValue("@Name", "Младший программист");
@@ -395,6 +412,7 @@ namespace Employees.Data
                 cmd.Parameters.AddWithValue("@BossId", e.BossId ?? Convert.DBNull).IsNullable = true;
                 cmd.Parameters.AddWithValue("@PosId", e.PositionId);
                 cmd.Parameters.AddWithValue("@DepId", e.DepartmentId);
+                cmd.Parameters.AddWithValue("@Rdate", e.RecruitDate);
                 cmd.ExecuteNonQuery();
             }
         }
