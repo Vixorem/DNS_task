@@ -56,8 +56,20 @@ namespace Employees.Controllers
         [HttpPost]
         public IActionResult EditConfirmed(int id)
         {
+            if (EmployeeExists(id) == false)
+            {
+                return Json(new
+                {
+                    success = true,
+                    responseText = $"Employee with id {id} doesn't exist"
+                }); 
+            }
 
-            return null;
+
+            return Json(new
+            {
+                success = true
+            });
         }
 
         public IActionResult GetSelections()

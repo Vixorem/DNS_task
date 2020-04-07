@@ -4,12 +4,11 @@
     $("#add").click(function (event) {
         event.preventDefault();
         console.log("#add clicked");
-        EmpRequest.GetCreate(DocManager.SetUpCreate);
+        EmpRequest.GetCreate(DocManager.SetUpSelections);
     });
 
 });
 
-//TODO: делаем редактирование
 
 class Position {
     Id: number;
@@ -50,7 +49,52 @@ class EmpRequest {
     ];
 
     static PostEdit(id): void {
+        console.log("POST to EditConfirmed");
+        var emp: Employee = new Employee();
+        var bossSelect = document.getElementById("bossSelection");
+        var posSelect = document.getElementById("positionSelection");
+        var depSelect = document.getElementById("departmentSelection");
 
+        emp.Id = id;
+        emp.Name = document.getElementById("name").value;
+        emp.Secondname = document.getElementById("secondname").value;
+        emp.Surname = document.getElementById("surname").value;
+        emp.BossId = Number(bossSelect[bossSelect.selectedIndex].value);
+        emp.PositionId = Number(posSelect[posSelect.selectedIndex].value);
+        emp.DepartmentId = Number(depSelect[depSelect.selectedIndex].value);
+        emp.Boss = new Employee();
+        emp.Boss.Id = emp.BossId;
+        emp.Boss.Surname = bossSelect[bossSelect.selectedIndex].textContent;
+        emp.Position = new Position();
+        emp.Position.Id = emp.PositionId;
+        emp.Position.Name = posSelect[posSelect.selectedIndex].textContent;
+        emp.Department = new Department();
+        emp.Department.Id = emp.DepartmentId;
+        emp.Department.Name = depSelect[depSelect.selectedIndex].textContent;
+        var date = new Date(document.getElementById("recdate").value);
+        emp.RecruitDate = date.toISOString();
+
+        $.ajax({
+            type: "POST",
+            url: "Employees/EditComfirmed/",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(emp),
+            success: function (response) {
+                if (response.success) {
+                    console.log("POST succeed");
+                    DocManager.RemoveAppearingHtml();
+                    DocManager.UpdateRow(id, response.emp);
+                } else {
+                    alert("Сервер не смог обработать запрос, " +
+                        "возможно, перезагрузка страницы cможет помочь");
+                    console.log("Controller returned error");
+                }
+            },
+            error: function (response) {
+                console.log("POST failed");
+            }
+        });
     }
 
     static GetEmployees(f: Function): void {
@@ -68,19 +112,32 @@ class EmpRequest {
 
     static GetEdit(f: Function, id): void {
         console.log("GET request for Edit()");
+        console.log("GET request for GetSelections()");
+
         $("#appearingLayout").load("Employees/Edit/", function () {
-            console.log("GET succeed");
-            $("#cancel").click(function (event) {
-                event.preventDefault();
-                console.log("#cancel clicked");
-                DocManager.RemoveAppearingHtml();
+            $.getJSON("Employees/GetSelections/", function (data) {
+                DocManager.SetUpSelections(data);
+            }).done(function () {
+                console.log("GET succeed");
+                $.getJSON("Employees/GetEmployee/" + id).done(function (data) {
+                    console.log("GET succeed");
+                    $("#cancel").click(function (event) {
+                        event.preventDefault();
+                        console.log("#cancel clicked");
+                        DocManager.RemoveAppearingHtml();
+                    });
+                    $("#delete").click(function (event) {
+                        event.preventDefault();
+                        console.log("#edit clicked");
+                        EmpRequest.PostEdit(id);
+                    });
+                    f(data.employee, id);
+                }).fail(function (data) {
+                    console.log("GET failed");
+                });
+            }).fail(function () {
+                console.log("GET failed");
             });
-            $("#delete").click(function (event) {
-                event.preventDefault();
-                console.log("#edit clicked");
-                EmpRequest.PostEdit(id);
-            });
-            f(id);
         });
     }
 
@@ -203,6 +260,7 @@ class EmpRequest {
             }
         });
     }
+
 }
 
 class DocManager {
@@ -210,7 +268,7 @@ class DocManager {
         document.getElementById("appearingLayout").innerHTML = "";
     }
 
-    static SetUpCreate(data): void {
+    static SetUpSelections(data): void {
         var bosses = data["bosses"];
         var positions = data["positions"];
         var departments = data["departments"];
@@ -236,12 +294,8 @@ class DocManager {
             $("#departmentSelection").append(opt);
         }
 
-        var today = new Date();
         var date = document.getElementById("recdate");
-        var y = today.getFullYear();
-        var m = (String(today.getMonth()).length == 1) ? ("0" + today.getMonth()) : (today.getMonth());
-        var d = (String(today.getDate()).length == 1) ? ("0" + today.getDate()) : (today.getDate());
-        date.value = y + "-" + m + "-" + d;
+        date.value = DocManager.ToHTMLDate(new Date());
     }
 
     static SetUpBosses(): void {
@@ -260,8 +314,11 @@ class DocManager {
             " " + "(" + dep + ", " + pos + ")");
     }
 
-    static SetUpEdit(id): void {
-
+    static SetUpEdit(emp, id): void {
+        $("#name").val(emp.name);
+        $("#secondname").val(emp.secondname);
+        $("#surname").val(emp.surname);
+        $("#bossSelection").val(emp.bossId);
     }
 
     static SetUpEmployees(data): void {
@@ -310,17 +367,14 @@ class DocManager {
             td6.textContent = data[i].boss.surname;
             var td7 = document.createElement("td");
             td7.className = "tdstyle";
-            var date = new Date(data[i].recruitDate);
-            var y = date.getFullYear();
-            var m = (String(date.getMonth()).length == 1) ? ("0" + date.getMonth()) : (date.getMonth());
-            var d = (String(date.getDate()).length == 1) ? ("0" + date.getDate()) : (date.getDate());
-            td7.textContent = d + "." + m + "." + y;
+            td7.textContent = DocManager.ToReadableDate(new Date(data[i].recruitDate));
             var td8 = document.createElement("td");
             td8.className = "tdstyle";
             var a1 = document.createElement("a");
             a1.className = "editButton";
-            a1.href = "/Employees/Edit/" + data[i].id;
+            //a1.href = "/Employees/Edit/" + data[i].id;
             a1.textContent = "Изменить";
+            let id: string = data[i].id;
             a1.addEventListener("click", function (e) {
                 e.preventDefault();
                 EmpRequest.GetEdit(DocManager.SetUpEdit, id);
@@ -335,9 +389,8 @@ class DocManager {
             }, false);
             var a3 = document.createElement("a");
             a3.className = "deleteButton";
-            a3.href = "/Employees/Delete/" + data[i].id;
+            //a3.href = "/Employees/Delete/" + data[i].id;
             a3.textContent = "Удалить";
-            var id = data[i].id;
             a3.addEventListener("click", function (e) {
                 e.preventDefault();
                 EmpRequest.GetDelete(DocManager.SetUpDelete, id)
@@ -373,5 +426,34 @@ class DocManager {
         table.appendChild(tbody);
 
         $("#empTable").html(table);
+    }
+
+    static UpdateRow(id, emp: Employee): void {
+        var children = $("#" + id).children();
+        children[0].textContent = emp.Name;
+        children[1].textContent = emp.Secondname;
+        children[2].textContent = emp.Surname;
+        children[3].textContent = emp.Position.Name;
+        children[4].textContent = emp.Department.Name;
+        children[5].textContent = emp.Boss.Surname;
+        children[4].textContent = DocManager.ToReadableDate(emp.RecruitDate);
+    }
+
+    static ToReadableDate(date): string {
+        var y = date.getFullYear();
+        var m = (String(date.getMonth()).length == 1) ?
+            ("0" + date.getMonth()) : (date.getMonth());
+        var d = (String(date.getDate()).length == 1) ?
+            ("0" + date.getDate()) : (date.getDate());
+        return `${d}.${m}.${y}`;
+    }
+
+    static ToHTMLDate(date): string {
+        var y = date.getFullYear();
+        var m = (String(date.getMonth()).length == 1) ?
+            ("0" + date.getMonth()) : (date.getMonth());
+        var d = (String(date.getDate()).length == 1) ?
+            ("0" + date.getDate()) : (date.getDate());
+        return `${y}-${m}-${d}`;
     }
 }

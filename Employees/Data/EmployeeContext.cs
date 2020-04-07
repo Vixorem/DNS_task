@@ -30,6 +30,29 @@ namespace Employees.Data
             }
         }
 
+        /*Returns updated row*/
+        public Employee UpdateEmployee(Employee e)
+        {
+            using (var connect = new SqlConnection(connectionStr))
+            {
+                connect.Open();
+                var cmd = new SqlCommand("UpdateEmployee", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                cmd.Parameters.AddWithValue("@Id", e.Id);
+                cmd.Parameters.AddWithValue("@Secondname", e.Secondname);
+                cmd.Parameters.AddWithValue("@Surname", e.Surname);
+                cmd.Parameters.AddWithValue("@BossId", e.BossId);
+                cmd.Parameters.AddWithValue("@PosId", e.PositionId);
+                cmd.Parameters.AddWithValue("@DepId", e.DepartmentId);
+                cmd.Parameters.AddWithValue("@Rdate", e.RecruitDate);
+                cmd.ExecuteNonQuery();
+            }
+
+            return FetchLastEmployee();
+        }
+
         public Employee FetchEmployeeById(int? id)
         {
             Employee e = null;
