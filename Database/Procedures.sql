@@ -410,18 +410,46 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT [Id]
-		,[Name]
-		,[Secondname]
-		,[Surname]
-		,[BossId]
-		,[Surname]
-		,[PositionId]
-		,[Name]
-		,[DepartmentId]
-		,[Name]
-		,[RecruitDate]
-	FROM dbo.Employees
+	SELECT *
+	FROM (
+		(
+			SELECT [Emp].[Id]
+				,[Emp].[Name]
+				,[Emp].[Secondname]
+				,[Emp].[Surname]
+				,[Emp].[BossId]
+				,[Boss].[Surname] AS BossSurname
+				,[Emp].[PositionId]
+				,[Pos].[Name] AS PosName
+				,[Emp].[DepartmentId]
+				,[Dep].[Name] AS DepName
+				,[Emp].[RecruitDate]
+			FROM dbo.Employees AS Emp
+			JOIN dbo.Employees AS Boss ON Emp.BossId = Boss.Id
+			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
+			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
+			)
+		
+		UNION
+		
+		(
+			SELECT [Emp].[Id]
+				,[Emp].[Name]
+				,[Emp].[Secondname]
+				,[Emp].[Surname]
+				,[Emp].[BossId]
+				,'' AS BossSurname
+				,[Emp].[PositionId]
+				,[Pos].[Name] AS PosName
+				,[Emp].[DepartmentId]
+				,[Dep].[Name] AS DepName
+				,[Emp].[RecruitDate]
+			FROM dbo.Employees AS Emp
+			JOIN dbo.Employees AS Boss ON (Emp.BossId IS NULL)
+			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
+			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
+			)
+		) AS T
 	WHERE Id = (
 			SELECT MAX(Id)
 			FROM dbo.Employees

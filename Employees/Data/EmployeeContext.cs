@@ -30,6 +30,26 @@ namespace Employees.Data
             }
         }
 
+        public int EmployeesCount()
+        {
+            int count = 0;
+            using (var connect = new SqlConnection(connectionStr))
+            {
+                connect.Open();
+                var cmd = new SqlCommand("EmployeesCount", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    count = reader.GetInt32(0);
+                }
+            }
+
+            return count;
+        }
+
         /*Returns updated row*/
         public Employee UpdateEmployee(Employee e)
         {
@@ -250,13 +270,13 @@ namespace Employees.Data
             using (var connect = new SqlConnection(connectionStr))
             {
                 connect.Open();
-                var empcmd = new SqlCommand("FetchEmployeesRange", connect)
+                var cmd = new SqlCommand("FetchEmployeesRange", connect)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
-                empcmd.Parameters.AddWithValue("@FetchNum", fetchNum);
-                empcmd.Parameters.AddWithValue("@PageNum", pageNum);
-                var reader = empcmd.ExecuteReader();
+                cmd.Parameters.AddWithValue("@FetchNum", fetchNum);
+                cmd.Parameters.AddWithValue("@PageNum", pageNum);
+                var reader = cmd.ExecuteReader();
 
                 while (reader.Read())
                 {

@@ -80,9 +80,30 @@
     }
 
     .pagination {
+        display: inline-block;
+    }
+
+    .page {
         color: black;
+        background: #00fffc;
         float: left;
-        padding: 8px 16px;
+        padding: 8px 25px;
+        text-decoration: none;
+    }
+
+        .page:hover {
+            color: black;
+            background: #f9ff93;
+            float: left;
+            padding: 8px 25px;
+            text-decoration: none;
+        }
+
+    .current {
+        color: black;
+        background: #44ffa1;
+        float: left;
+        padding: 8px 25px;
         text-decoration: none;
     }
 </style>
@@ -105,12 +126,7 @@
         </tr>
     </table>
 </div>
-<div class="item-list">
-    <ul class="pager">
-        <li class="pager-current first"><span>1</span></li>
-        <li class="pager-item"><a href="/node?page=1" title="На страницу номер 2">2</a></li>
-        <li class="pager-item"><a href="/node?page=2" title="На страницу номер 3">3</a></li>
-        <li class="pager-item"><a href="/node?page=3" title="На страницу номер 4">4</a></li>
-        <li class="pager-next last"><a href="/node?page=1" title="На следующую страницу">›</a></li>
+<div align="center">
+    <ul id="pages" class="pagination">
     </ul>
 </div>

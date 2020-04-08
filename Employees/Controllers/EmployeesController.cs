@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Employees.Data;
+﻿using Employees.Data;
 using Employees.Models;
+
+using Microsoft.AspNetCore.Mvc;
+
+using System;
+using System.Threading.Tasks;
 
 namespace Employees.Controllers
 {
     public class EmployeesController : Controller
     {
         private readonly EmployeeContext _context = new EmployeeContext();
-        private readonly int fetchSiz = 30;
+        private readonly int rowsOnPage = 10;
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -20,26 +19,34 @@ namespace Employees.Controllers
             return View();
         }
 
-        [HttpGet]
-        public IActionResult GetEmployees()
+        [HttpPost]
+        public IActionResult GetEmployees([FromBody]int pageNum)
         {
-            var employeeContext = _context.FetchEmployeesRange(fetchSiz, 1);
-            return Json(employeeContext);
+            if (pageNum > rowsOnPage)
+            {
+                return Json(new
+                {
+                    success = false,
+                    responseText = "The page doesn't exist"
+                });
+            }
+            var employees = _context.FetchEmployeesRange(rowsOnPage, 1);
+            return Json(new
+            {
+                success = true,
+                totalPagesNum = Math.Ceiling(_context.EmployeesCount() / (double)rowsOnPage),
+                employees
+            });
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            return PartialView();
-        }
-
         public IActionResult GetEmployee(int id)
         {
             if (EmployeeExists(id) == false)
             {
                 return Json(new
                 {
-                    success = true,
+                    success = false,
                     responseText = "The employee never existed or already removed"
                 });
             }
@@ -51,6 +58,12 @@ namespace Employees.Controllers
                 success = true,
                 employee = emp
             });
+        }
+
+        [HttpGet]
+        public IActionResult Edit()
+        {
+            return PartialView();
         }
 
         [HttpPost]
@@ -107,10 +120,6 @@ namespace Employees.Controllers
         [HttpPost]
         public IActionResult Create([FromBody]  Employee employee)
         {
-            /*
-             Если на текущей страницы есть место, чтобы добавить запись,
-             то, после подтверждения, добавляем ее сами на клиенте
-             */
             if (employee == null)
             {
                 return Json(new

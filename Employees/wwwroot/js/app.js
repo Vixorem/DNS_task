@@ -1,9 +1,10 @@
 $(function () {
-    EmpRequest.GetEmployees(DocManager.SetUpEmployees);
+    EmpRequest.GetEmployees(1, DocManager.SetUpEmployees, DocManager.SetUpPages);
     $("#add").click(function (event) {
         event.preventDefault();
-        console.log("#add clicked");
         EmpRequest.GetCreate(DocManager.SetUpSelections);
+    });
+    $("#aboutPage").click(function (event) {
     });
 });
 var Position = /** @class */ (function () {
@@ -24,27 +25,29 @@ var Employee = /** @class */ (function () {
 var EmpRequest = /** @class */ (function () {
     function EmpRequest() {
     }
+    EmpRequest.GetAbout = function (f) {
+        $("");
+    };
     EmpRequest.GetEdit = function (f, id) {
         console.log("GET request for Edit()");
-        console.log("GET request for GetSelections()");
         $("#appearingLayout").load("Employees/Edit/", function () {
+            console.log("GET request for GetSelections()");
             $.getJSON("Employees/GetSelections/", function (data) {
                 DocManager.SetUpSelections(data, id);
             }).done(function () {
                 console.log("GET succeed");
-                $.getJSON("Employees/GetEmployee/" + id).done(function (data) {
+                console.log("GET request for GetEmployee()");
+                $.getJSON("Employees/GetEmployee/" + id).done(function (response) {
                     console.log("GET succeed");
                     $("#cancel").click(function (event) {
                         event.preventDefault();
-                        console.log("#cancel clicked");
                         DocManager.RemoveAppearingHtml();
                     });
                     $("#edit").click(function (event) {
                         event.preventDefault();
-                        console.log("#edit clicked");
                         EmpRequest.PostEdit(id);
                     });
-                    f(data.employee, id);
+                    f(response.employee, id);
                 }).fail(function (data) {
                     console.log("GET failed");
                 });
@@ -107,18 +110,30 @@ var EmpRequest = /** @class */ (function () {
             }
         });
     };
-    EmpRequest.GetEmployees = function (f) {
-        console.log("GET request for LoadEmployees()");
-        $.getJSON("/Employees/GetEmployees", function (data) {
-        }).done(function (data) {
-            console.log("GET succeed");
-            f(data);
-        }).fail(function (data) {
-            console.log("GET failed");
+    EmpRequest.GetEmployees = function (pageNum, setUpEmp, setUpPages) {
+        console.log("POST request for GetEmployees()");
+        $.ajax({
+            type: "POST",
+            url: "/Employees/GetEmployees/",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify(pageNum),
+            success: function (response) {
+                if (response.success) {
+                    console.log("POST succeed");
+                    setUpEmp(response.employees);
+                }
+                else {
+                    console.log("POST succeed");
+                }
+            },
+            error: function (response) {
+                console.log("POST failed");
+            }
         });
     };
     EmpRequest.GetBosses = function (f, ref) {
-        console.log("GET request for LoadBosses()");
+        console.log("GET request for GetBosses()");
         $.getJSON(ref, function (data) {
         }).done(function (data) {
             console.log("GET succeed");
@@ -135,12 +150,10 @@ var EmpRequest = /** @class */ (function () {
             $("#appearingLayout").load("Employees/Create", function () {
                 $("#cancel").click(function (event) {
                     event.preventDefault();
-                    console.log("#cancel clicked");
                     DocManager.RemoveAppearingHtml();
                 });
                 $("#create").click(function (event) {
                     event.preventDefault();
-                    console.log("#create clicked");
                     EmpRequest.PostCreate();
                 });
                 f(data);
@@ -197,12 +210,10 @@ var EmpRequest = /** @class */ (function () {
             console.log("GET succeed");
             $("#cancel").click(function (event) {
                 event.preventDefault();
-                console.log("#cancel clicked");
                 DocManager.RemoveAppearingHtml();
             });
             $("#delete").click(function (event) {
                 event.preventDefault();
-                console.log("#delete clicked");
                 EmpRequest.PostDelete(id);
             });
             f(id);
@@ -431,6 +442,8 @@ var DocManager = /** @class */ (function () {
         var d = (String(date.getDate()).length == 1) ?
             ("0" + date.getDate()) : (date.getDate());
         return y + "-" + m + "-" + d;
+    };
+    DocManager.SetUpPages = function () {
     };
     return DocManager;
 }());
