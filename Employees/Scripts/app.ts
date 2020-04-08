@@ -140,25 +140,17 @@ class EmpRequest {
     }
 
     static GetEmployees(pageNum, setUpEmp: Function, setUpPages: Function): void {
-        console.log("POST request for GetEmployees()");
+        console.log("GET request for GetEmployees()");
 
-        $.ajax({
-            type: "POST",
-            url: "/Employees/GetEmployees/",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(pageNum),
-            success: function (response) {
-                if (response.success) {
-                    console.log("POST succeed");
-                    setUpEmp(response.employees);
-                } else {
-                    console.log("POST succeed");
-                }
-            },
-            error: function (response) {
-                console.log("POST failed");
+        $.getJSON(`/Employees/GetEmployees/${pageNum}`).done(function (response) {
+            if (response.success) {
+                console.log("GET succeed");
+                setUpEmp(response.employees);
+            } else {
+                console.log("GET succeed");
             }
+        }).fail(function (response) {
+            console.log("GET failed");
         });
 
     }

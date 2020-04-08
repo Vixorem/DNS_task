@@ -19,10 +19,10 @@ namespace Employees.Controllers
             return View();
         }
 
-        [HttpPost]
-        public IActionResult GetEmployees([FromBody]int pageNum)
+        [HttpGet]
+        public IActionResult GetEmployees(int id)
         {
-            if (pageNum > rowsOnPage)
+            if (id > rowsOnPage)
             {
                 return Json(new
                 {

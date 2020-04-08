@@ -111,26 +111,36 @@ var EmpRequest = /** @class */ (function () {
         });
     };
     EmpRequest.GetEmployees = function (pageNum, setUpEmp, setUpPages) {
-        console.log("POST request for GetEmployees()");
-        $.ajax({
-            type: "POST",
-            url: "/Employees/GetEmployees/",
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(pageNum),
-            success: function (response) {
-                if (response.success) {
-                    console.log("POST succeed");
-                    setUpEmp(response.employees);
-                }
-                else {
-                    console.log("POST succeed");
-                }
-            },
-            error: function (response) {
-                console.log("POST failed");
+        console.log("GET request for GetEmployees()");
+        $.getJSON("/Employees/GetEmployees/" + pageNum).done(function (response) {
+            if (response.success) {
+                console.log("GET succeed");
+                setUpEmp(response.employees);
             }
+            else {
+                console.log("GET succeed");
+            }
+        }).fail(function (response) {
+            console.log("GET failed");
         });
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/Employees/GetEmployees/",
+        //    contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+        //    data: JSON.stringify(pageNum),
+        //    success: function (response) {
+        //        if (response.success) {
+        //            console.log("POST succeed");
+        //            setUpEmp(response.employees);
+        //        } else {
+        //            console.log("POST succeed");
+        //        }
+        //    },
+        //    error: function (response) {
+        //        console.log("POST failed");
+        //    }
+        //});
     };
     EmpRequest.GetBosses = function (f, ref) {
         console.log("GET request for GetBosses()");
