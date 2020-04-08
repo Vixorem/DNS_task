@@ -10,7 +10,6 @@ CREATE TABLE [Positions] (
 
 CREATE TABLE [Employees] (
 	[Id] INT identity(1, 1) PRIMARY KEY
-	,[Hid] HIERARCHYID NOT NULL
 	,[Name] VARCHAR(50) NULL
 	,[Secondname] VARCHAR(50)
 	,[Surname] VARCHAR(50)

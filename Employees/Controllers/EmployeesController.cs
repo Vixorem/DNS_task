@@ -12,7 +12,7 @@ namespace Employees.Controllers
     public class EmployeesController : Controller
     {
         private readonly EmployeeContext _context = new EmployeeContext();
-        private readonly int fetchSiz = 10;
+        private readonly int fetchSiz = 30;
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -54,21 +54,23 @@ namespace Employees.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditConfirmed(int id)
+        public IActionResult EditConfirmed([FromBody]Employee e)
         {
-            if (EmployeeExists(id) == false)
+            if (e.Id == null || EmployeeExists((int)e.Id) == false)
             {
                 return Json(new
                 {
                     success = true,
-                    responseText = $"Employee with id {id} doesn't exist"
-                }); 
+                    responseText = $"Employee with id {e.Id} doesn't exist"
+                });
             }
 
+            var emp = _context.UpdateEmployee(e);
 
             return Json(new
             {
-                success = true
+                success = true,
+                Employee = emp
             });
         }
 

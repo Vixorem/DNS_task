@@ -40,17 +40,19 @@ namespace Employees.Data
                 {
                     CommandType = CommandType.StoredProcedure
                 };
-                cmd.Parameters.AddWithValue("@Id", e.Id);
+                cmd.Parameters.AddWithValue("@Id", (e.Id == null) ? ((object)DBNull.Value) : (e.Id));
+                cmd.Parameters.AddWithValue("@Name", e.Name);
                 cmd.Parameters.AddWithValue("@Secondname", e.Secondname);
                 cmd.Parameters.AddWithValue("@Surname", e.Surname);
-                cmd.Parameters.AddWithValue("@BossId", e.BossId);
+                cmd.Parameters.AddWithValue("@BossId", (e.BossId == null) ? ((object)DBNull.Value) : (e.BossId));
                 cmd.Parameters.AddWithValue("@PosId", e.PositionId);
                 cmd.Parameters.AddWithValue("@DepId", e.DepartmentId);
                 cmd.Parameters.AddWithValue("@Rdate", e.RecruitDate);
                 cmd.ExecuteNonQuery();
+
             }
 
-            return FetchLastEmployee();
+            return e;
         }
 
         public Employee FetchEmployeeById(int? id)

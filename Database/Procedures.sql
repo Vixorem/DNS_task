@@ -35,76 +35,39 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	DECLARE @BossExist INT
-		,@BossHid HIERARCHYID
-		,@LastHid HIERARCHYID;
+	DECLARE @BossExist INT;
 
 	SELECT @BossExist = count(*)
 	FROM dbo.Employees
-	WHERE Hid = HIERARCHYID::GetRoot();
+	WHERE Id = NULL;
 
 	IF @BossExist != 0
 		AND @BossId IS NULL
 		RETURN;
 
-	IF @BossId IS NULL
-		INSERT dbo.Employees (
-			[Hid]
-			,[Name]
-			,[Secondname]
-			,[Surname]
-			,[BossId]
-			,[PositionId]
-			,[DepartmentId]
-			,[RecruitDate]
-			)
-		VALUES (
-			HIERARCHYID::GetRoot()
-			,@Name
-			,@Secondname
-			,@Surname
-			,@BossId
-			,@PosId
-			,@DepId
-			,@Rdate
-			);
-	ELSE
-	BEGIN
-		SELECT @BossHid = (
-				SELECT Hid
-				FROM dbo.Employees
-				WHERE Id = @BossId
-				);
-
-		SELECT @LastHid = MAX(Hid)
-		FROM dbo.Employees
-		WHERE Hid.GetAncestor(1) = @BossHid;
-
-		INSERT dbo.Employees (
-			[Hid]
-			,[Name]
-			,[Secondname]
-			,[Surname]
-			,[BossId]
-			,[PositionId]
-			,[DepartmentId]
-			,[RecruitDate]
-			)
-		VALUES (
-			@BossHid.GetDescendant(@LastHid, NULL)
-			,@Name
-			,@Secondname
-			,@Surname
-			,@BossId
-			,@PosId
-			,@DepId
-			,@Rdate
-			);
-	END;
+	INSERT dbo.Employees (
+		[Name]
+		,[Secondname]
+		,[Surname]
+		,[BossId]
+		,[PositionId]
+		,[DepartmentId]
+		,[RecruitDate]
+		)
+	VALUES (
+		@Name
+		,@Secondname
+		,@Surname
+		,@BossId
+		,@PosId
+		,@DepId
+		,@Rdate
+		);
 END
 GO
 
-CREATE PROCEDURE UpdateEmployee @Name VARCHAR(50)
+CREATE PROCEDURE UpdateEmployee @Id INT
+	,@Name VARCHAR(50)
 	,@Secondname VARCHAR(50)
 	,@Surname VARCHAR(50)
 	,@BossId INT
@@ -119,7 +82,7 @@ BEGIN
 
 	SELECT @BossExist = count(*)
 	FROM dbo.Employees
-	WHERE Hid = HIERARCHYID::GetRoot();
+	WHERE Id IS NULL;
 
 	IF @BossExist != 0
 		AND @BossId IS NULL
@@ -132,7 +95,8 @@ BEGIN
 		,[BossId] = @BossId
 		,[PositionId] = @PosId
 		,[DepartmentId] = @DepId
-		,[RecruitDate] = @Rdate;
+		,[RecruitDate] = @Rdate
+	WHERE @Id = Id;
 END
 GO
 
@@ -167,7 +131,7 @@ BEGIN
 				,[Dep].[Name] AS DepName
 				,[Emp].[RecruitDate]
 			FROM dbo.Employees AS Emp
-			JOIN dbo.Employees AS Boss ON Emp.Hid.GetAncestor(1) = Boss.Hid
+			JOIN dbo.Employees AS Boss ON Emp.BossId = Boss.Id
 			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
 			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
 			)
@@ -187,10 +151,7 @@ BEGIN
 				,[Dep].[Name] AS DepName
 				,[Emp].[RecruitDate]
 			FROM dbo.Employees AS Emp
-			JOIN dbo.Employees AS Boss ON (
-					Emp.BossId IS NULL
-					AND Boss.Hid = HIERARCHYID::GetRoot()
-					)
+			JOIN dbo.Employees AS Boss ON (Emp.BossId IS NULL)
 			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
 			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
 			)
@@ -219,7 +180,7 @@ BEGIN
 				,[Dep].[Name] AS DepName
 				,[Emp].[RecruitDate]
 			FROM dbo.Employees AS Emp
-			JOIN dbo.Employees AS Boss ON Emp.Hid.GetAncestor(1) = Boss.Hid
+			JOIN dbo.Employees AS Boss ON Emp.BossId = Boss.Id
 			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
 			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
 			)
@@ -239,10 +200,7 @@ BEGIN
 				,[Dep].[Name] AS DepName
 				,[Emp].[RecruitDate]
 			FROM dbo.Employees AS Emp
-			JOIN dbo.Employees AS Boss ON (
-					Emp.BossId IS NULL
-					AND Boss.Hid = HIERARCHYID::GetRoot()
-					)
+			JOIN dbo.Employees AS Boss ON (Emp.BossId IS NULL)
 			JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
 			JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
 			)
@@ -310,7 +268,41 @@ GO
 CREATE PROCEDURE FetchEmployeeById @Id INT
 AS
 BEGIN
+	DECLARE @a INT;
+
 	SET NOCOUNT ON;
+	SET @a = (
+			SELECT BossId
+			FROM dbo.Employees
+			WHERE @Id = Id
+			);
+
+	PRINT @a;
+
+	IF (
+			SELECT BossId
+			FROM dbo.Employees
+			WHERE @Id = Id
+			) IS NULL
+	BEGIN
+		SELECT [Emp].[Id]
+			,[Emp].[Name]
+			,[Emp].[Secondname]
+			,[Emp].[Surname]
+			,NULL
+			,''
+			,[Emp].[PositionId]
+			,[Pos].[Name]
+			,[Emp].[DepartmentId]
+			,[Dep].[Name]
+			,[Emp].[RecruitDate]
+		FROM dbo.Employees AS Emp
+		JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
+		JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
+		WHERE [Emp].[Id] = @Id;
+
+		RETURN;
+	END
 
 	SELECT [Emp].[Id]
 		,[Emp].[Name]
@@ -325,10 +317,10 @@ BEGIN
 		,[Emp].[RecruitDate]
 	FROM dbo.Employees AS Emp
 	JOIN dbo.Employees AS Boss ON (
-			Emp.Hid.GetAncestor(1) = Boss.Hid
-			OR Emp.Hid = HIERARCHYID::GetRoot()
+			Emp.BossId = Boss.Id
+			OR Emp.Id IS NULL
 			)
-		AND Emp.Hid != Boss.Hid
+		AND Emp.Id != Boss.Id
 	JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.Id
 	JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.Id
 	WHERE [Emp].[Id] = @Id;

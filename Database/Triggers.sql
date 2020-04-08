@@ -13,19 +13,18 @@ GO
 CREATE TRIGGER OnEmployeeDelete ON dbo.Employees
 INSTEAD OF DELETE
 AS
-DECLARE @DelHid HIERARCHYID
-	,@BossHid HIERARCHYID
-	,@BossId INT
+DECLARE @DelId INT
 	,@ChildrenCount INT
+	,@NewBossId INT;
 
 IF IS_MEMBER('db_owner') = 0
 BEGIN
-	SET @DelHid = (
-			SELECT Hid
+	SET @DelId = (
+			SELECT Id
 			FROM deleted
 			);
 
-	IF @DelHid = HIERARCHYID::GetRoot()
+	IF @DelId IS NULL
 	BEGIN
 		RAISERROR (
 				16
@@ -39,30 +38,27 @@ BEGIN
 
 	SELECT @ChildrenCount = COUNT(*)
 	FROM dbo.Employees
-	WHERE Hid.GetAncestor(1) = @DelHid;
+	WHERE [BossId] = @DelId;
 
 	IF @ChildrenCount = 0
 		DELETE
 		FROM dbo.Eployees
-		WHERE Hid = @DelHid;
+		WHERE Id = @DelId;
 	ELSE
 	BEGIN
-		SET @BossHid = @DelHid.GetAncestor(1);
-
-		@BossId = (
-				SELECT Id
+		SELECT @NewBossId = (
+				SELECT BossId
 				FROM dbo.Employees
-				WHERE Hid = @BossHid
+				WHERE @DelId = Id
 				);
 
 		UPDATE dbo.Employees
-		SET [Hid] = Hid.GetReparentedValue(@DelHid, @BossHid)
-			,[BossId] = @BossId
-		WHERE Hid.IsDecendantOf(@DelHid) = 1;
+		SET [BossId] = @NewBossId
+		WHERE [BossId] = @NewBossId;
 
 		DELETE
 		FROM dbo.Eployees
-		WHERE Hid = @DelHid;
+		WHERE [Id] = @DelId;
 	END
 END
 GO

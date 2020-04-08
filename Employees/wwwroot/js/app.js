@@ -24,22 +24,58 @@ var Employee = /** @class */ (function () {
 var EmpRequest = /** @class */ (function () {
     function EmpRequest() {
     }
+    EmpRequest.GetEdit = function (f, id) {
+        console.log("GET request for Edit()");
+        console.log("GET request for GetSelections()");
+        $("#appearingLayout").load("Employees/Edit/", function () {
+            $.getJSON("Employees/GetSelections/", function (data) {
+                DocManager.SetUpSelections(data, id);
+            }).done(function () {
+                console.log("GET succeed");
+                $.getJSON("Employees/GetEmployee/" + id).done(function (data) {
+                    console.log("GET succeed");
+                    $("#cancel").click(function (event) {
+                        event.preventDefault();
+                        console.log("#cancel clicked");
+                        DocManager.RemoveAppearingHtml();
+                    });
+                    $("#edit").click(function (event) {
+                        event.preventDefault();
+                        console.log("#edit clicked");
+                        EmpRequest.PostEdit(id);
+                    });
+                    f(data.employee, id);
+                }).fail(function (data) {
+                    console.log("GET failed");
+                });
+            }).fail(function () {
+                console.log("GET failed");
+            });
+        });
+    };
     EmpRequest.PostEdit = function (id) {
         console.log("POST to EditConfirmed");
         var emp = new Employee();
         var bossSelect = document.getElementById("bossSelection");
         var posSelect = document.getElementById("positionSelection");
         var depSelect = document.getElementById("departmentSelection");
-        emp.Id = id;
+        emp.Id = Number(id);
         emp.Name = document.getElementById("name").value;
         emp.Secondname = document.getElementById("secondname").value;
         emp.Surname = document.getElementById("surname").value;
-        emp.BossId = Number(bossSelect[bossSelect.selectedIndex].value);
+        emp.Boss = new Employee();
+        if (bossSelect.selectedIndex < 0) {
+            emp.BossId = null;
+            emp.Boss.Id = emp.BossId;
+            emp.Boss.Surname = "";
+        }
+        else {
+            emp.BossId = Number(bossSelect[bossSelect.selectedIndex].value);
+            emp.Boss.Id = emp.BossId;
+            emp.Boss.Surname = bossSelect[bossSelect.selectedIndex].textContent;
+        }
         emp.PositionId = Number(posSelect[posSelect.selectedIndex].value);
         emp.DepartmentId = Number(depSelect[depSelect.selectedIndex].value);
-        emp.Boss = new Employee();
-        emp.Boss.Id = emp.BossId;
-        emp.Boss.Surname = bossSelect[bossSelect.selectedIndex].textContent;
         emp.Position = new Position();
         emp.Position.Id = emp.PositionId;
         emp.Position.Name = posSelect[posSelect.selectedIndex].textContent;
@@ -50,7 +86,7 @@ var EmpRequest = /** @class */ (function () {
         emp.RecruitDate = date.toISOString();
         $.ajax({
             type: "POST",
-            url: "Employees/EditComfirmed/",
+            url: "Employees/EditConfirmed/",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             data: JSON.stringify(emp),
@@ -58,7 +94,7 @@ var EmpRequest = /** @class */ (function () {
                 if (response.success) {
                     console.log("POST succeed");
                     DocManager.RemoveAppearingHtml();
-                    DocManager.UpdateRow(id, response.emp);
+                    DocManager.UpdateRow(id, response.employee);
                 }
                 else {
                     alert("Сервер не смог обработать запрос, " +
@@ -79,35 +115,6 @@ var EmpRequest = /** @class */ (function () {
             f(data);
         }).fail(function (data) {
             console.log("GET failed");
-        });
-    };
-    EmpRequest.GetEdit = function (f, id) {
-        console.log("GET request for Edit()");
-        console.log("GET request for GetSelections()");
-        $("#appearingLayout").load("Employees/Edit/", function () {
-            $.getJSON("Employees/GetSelections/", function (data) {
-                DocManager.SetUpSelections(data);
-            }).done(function () {
-                console.log("GET succeed");
-                $.getJSON("Employees/GetEmployee/" + id).done(function (data) {
-                    console.log("GET succeed");
-                    $("#cancel").click(function (event) {
-                        event.preventDefault();
-                        console.log("#cancel clicked");
-                        DocManager.RemoveAppearingHtml();
-                    });
-                    $("#delete").click(function (event) {
-                        event.preventDefault();
-                        console.log("#edit clicked");
-                        EmpRequest.PostEdit(id);
-                    });
-                    f(data.employee, id);
-                }).fail(function (data) {
-                    console.log("GET failed");
-                });
-            }).fail(function () {
-                console.log("GET failed");
-            });
         });
     };
     EmpRequest.GetBosses = function (f, ref) {
@@ -242,7 +249,8 @@ var DocManager = /** @class */ (function () {
     DocManager.RemoveAppearingHtml = function () {
         document.getElementById("appearingLayout").innerHTML = "";
     };
-    DocManager.SetUpSelections = function (data) {
+    DocManager.SetUpSelections = function (data, id) {
+        if (id === void 0) { id = null; }
         var bosses = data["bosses"];
         var positions = data["positions"];
         var departments = data["departments"];
@@ -264,8 +272,7 @@ var DocManager = /** @class */ (function () {
             opt.textContent = departments[i].name;
             $("#departmentSelection").append(opt);
         }
-        var date = document.getElementById("recdate");
-        date.value = DocManager.ToHTMLDate(new Date());
+        $("#recdate").val(DocManager.ToHTMLDate(new Date()));
     };
     DocManager.SetUpBosses = function () {
     };
@@ -276,15 +283,16 @@ var DocManager = /** @class */ (function () {
         var surname = children[2].textContent;
         var pos = children[3].textContent;
         var dep = children[4].textContent;
-        $("#info").text(name
-            + " " + secondname + " " + surname +
-            " " + "(" + dep + ", " + pos + ")");
+        $("#info").text(name + " " + secondname + " " + surname + " ( " + dep + ", " + pos + ")");
     };
-    DocManager.SetUpEdit = function (emp, id) {
+    DocManager.SetUpEdit = function (emp) {
         $("#name").val(emp.name);
         $("#secondname").val(emp.secondname);
         $("#surname").val(emp.surname);
         $("#bossSelection").val(emp.bossId);
+        $("#positionSelection").val(emp.positionId);
+        $("#departmentSelection").val(emp.departmentId);
+        $("#recdate").val(DocManager.ToHTMLDate(new Date(emp.recruitDate)));
     };
     DocManager.SetUpEmployees = function (data) {
         var table = document.createElement("table");
@@ -302,66 +310,63 @@ var DocManager = /** @class */ (function () {
         thead.appendChild(tr);
         table.appendChild(thead);
         var tbody = document.createElement("tbody");
-        var _loop_1 = function () {
+        var _loop_1 = function (i) {
             tr = document.createElement("tr");
             tr.id = String(data[i].id);
-            td1 = document.createElement("td");
+            var td1 = document.createElement("td");
             td1.className = "tdstyle";
             td1.textContent = data[i].name;
-            td2 = document.createElement("td");
+            var td2 = document.createElement("td");
             td2.className = "tdstyle";
             td2.textContent = data[i].secondname;
-            td3 = document.createElement("td");
+            var td3 = document.createElement("td");
             td3.className = "tdstyle";
             td3.textContent = data[i].surname;
-            td4 = document.createElement("td");
+            var td4 = document.createElement("td");
             td4.className = "tdstyle";
             td4.textContent = data[i].position.name;
-            td5 = document.createElement("td");
+            var td5 = document.createElement("td");
             td5.className = "tdstyle";
             td5.textContent = data[i].department.name;
             if (data[i].boss.surname == null) {
                 data[i].boss.surname = "";
             }
-            td6 = document.createElement("td");
+            var td6 = document.createElement("td");
             td6.className = "tdstyle";
             td6.textContent = data[i].boss.surname;
-            td7 = document.createElement("td");
+            var td7 = document.createElement("td");
             td7.className = "tdstyle";
             td7.textContent = DocManager.ToReadableDate(new Date(data[i].recruitDate));
-            td8 = document.createElement("td");
+            var td8 = document.createElement("td");
             td8.className = "tdstyle";
-            a1 = document.createElement("a");
+            var a1 = document.createElement("a");
             a1.className = "editButton";
-            //a1.href = "/Employees/Edit/" + data[i].id;
             a1.textContent = "Изменить";
             var id = data[i].id;
             a1.addEventListener("click", function (e) {
                 e.preventDefault();
                 EmpRequest.GetEdit(DocManager.SetUpEdit, id);
             }, false);
-            a2 = document.createElement("a");
+            var a2 = document.createElement("a");
             a2.className = "bossesButton";
-            a2.href = "/Employees/Bosses/" + data[i].id;
             a2.textContent = "Руководители";
             a2.addEventListener("click", function (e) {
                 e.preventDefault();
-                EmpRequest.GetBosses(DocManager.SetUpEdit, a2.href);
+                //TODO
             }, false);
-            a3 = document.createElement("a");
+            var a3 = document.createElement("a");
             a3.className = "deleteButton";
-            //a3.href = "/Employees/Delete/" + data[i].id;
             a3.textContent = "Удалить";
             a3.addEventListener("click", function (e) {
                 e.preventDefault();
                 EmpRequest.GetDelete(DocManager.SetUpDelete, id);
             }, false);
-            tr21 = document.createElement("tr");
-            tr22 = document.createElement("tr");
-            tr23 = document.createElement("tr");
-            td21 = document.createElement("td");
-            td22 = document.createElement("td");
-            td23 = document.createElement("td");
+            var tr21 = document.createElement("tr");
+            var tr22 = document.createElement("tr");
+            var tr23 = document.createElement("tr");
+            var td21 = document.createElement("td");
+            var td22 = document.createElement("td");
+            var td23 = document.createElement("td");
             td21.appendChild(a1);
             td22.appendChild(a2);
             td23.appendChild(a3);
@@ -381,35 +386,36 @@ var DocManager = /** @class */ (function () {
             tr.appendChild(td8);
             tbody.appendChild(tr);
         };
-        var td1, td2, td3, td4, td5, td6, td7, td8, a1, a2, a3, tr21, tr22, tr23, td21, td22, td23;
         for (var i = 0; i < data.length; ++i) {
-            _loop_1();
+            _loop_1(i);
         }
         table.appendChild(tbody);
         $("#empTable").html(table);
     };
     DocManager.UpdateRow = function (id, emp) {
         var children = $("#" + id).children();
-        children[0].textContent = emp.Name;
-        children[1].textContent = emp.Secondname;
-        children[2].textContent = emp.Surname;
-        children[3].textContent = emp.Position.Name;
-        children[4].textContent = emp.Department.Name;
-        children[5].textContent = emp.Boss.Surname;
-        children[4].textContent = DocManager.ToReadableDate(emp.RecruitDate);
+        children[0].textContent = emp.name;
+        children[1].textContent = emp.secondname;
+        children[2].textContent = emp.surname;
+        children[3].textContent = emp.position.name;
+        children[4].textContent = emp.department.name;
+        children[5].textContent = emp.boss.surname;
+        children[6].textContent = DocManager.ToReadableDate(new Date(emp.recruitDate));
     };
     DocManager.ToReadableDate = function (date) {
         var y = date.getFullYear();
-        var m = (String(date.getMonth()).length == 1) ?
-            ("0" + date.getMonth()) : (date.getMonth());
+        var m = String(date.getMonth() + 1);
+        m = (m.length == 1) ?
+            ("0" + m) : (m);
         var d = (String(date.getDate()).length == 1) ?
             ("0" + date.getDate()) : (date.getDate());
         return d + "." + m + "." + y;
     };
     DocManager.ToHTMLDate = function (date) {
         var y = date.getFullYear();
-        var m = (String(date.getMonth()).length == 1) ?
-            ("0" + date.getMonth()) : (date.getMonth());
+        var m = String(date.getMonth() + 1);
+        m = (m.length == 1) ?
+            ("0" + m) : (m);
         var d = (String(date.getDate()).length == 1) ?
             ("0" + date.getDate()) : (date.getDate());
         return y + "-" + m + "-" + d;
