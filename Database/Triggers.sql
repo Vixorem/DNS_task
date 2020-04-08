@@ -19,7 +19,7 @@ DECLARE @DelId INT
 
 IF IS_MEMBER('db_owner') = 0
 BEGIN
-	SET @DelId = (
+	SELECT @DelId = (
 			SELECT Id
 			FROM deleted
 			);

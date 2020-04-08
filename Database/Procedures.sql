@@ -105,6 +105,53 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+	DECLARE @DelId INT
+		,@ChildrenCount INT
+		,@NewBossId INT;
+
+	SELECT @DelId = (
+			SELECT [Id]
+			FROM dbo.Employees
+			WHERE [Id] = @Id
+			);
+
+	IF @DelId IS NULL
+	BEGIN
+		RAISERROR (
+				13000
+				,- 1
+				,- 1
+				,'You cannot delete the main boss'
+				);
+
+		RETURN;
+	END
+
+	SELECT @ChildrenCount = COUNT(*)
+	FROM dbo.Employees
+	WHERE [BossId] = @DelId;
+
+	IF @ChildrenCount = 0
+		DELETE
+		FROM dbo.Employees
+		WHERE [Id] = @DelId;
+	ELSE
+	BEGIN
+		SELECT @NewBossId = (
+				SELECT BossId
+				FROM dbo.Employees
+				WHERE @DelId = [Id]
+				);
+
+		UPDATE dbo.Employees
+		SET [BossId] = @NewBossId
+		WHERE [BossId] = @DelId;
+
+		DELETE
+		FROM dbo.Employees
+		WHERE [Id] = @DelId;
+	END
+
 	DELETE
 	FROM dbo.Employees
 	WHERE [Id] = @Id;

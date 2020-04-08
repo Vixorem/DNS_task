@@ -177,7 +177,8 @@ var EmpRequest = /** @class */ (function () {
                 if (response.success) {
                     console.log("POST succeed");
                     DocManager.RemoveAppearingHtml();
-                    //TODO: если по пагинации норм, то вставить
+                    DocManager.AddRow(response.employee);
+                    //TODO: не вставлять, если не на той странице?
                 }
                 else {
                     alert("Сервер не смог обработать запрос, " +
@@ -219,6 +220,7 @@ var EmpRequest = /** @class */ (function () {
                 if (response.success) {
                     console.log("POST succeed");
                     DocManager.RemoveAppearingHtml();
+                    DocManager.RemoveRow(id);
                 }
                 else {
                     alert("Сервер не смог обработать запрос, " +
@@ -310,84 +312,9 @@ var DocManager = /** @class */ (function () {
         thead.appendChild(tr);
         table.appendChild(thead);
         var tbody = document.createElement("tbody");
-        var _loop_1 = function (i) {
-            tr = document.createElement("tr");
-            tr.id = String(data[i].id);
-            var td1 = document.createElement("td");
-            td1.className = "tdstyle";
-            td1.textContent = data[i].name;
-            var td2 = document.createElement("td");
-            td2.className = "tdstyle";
-            td2.textContent = data[i].secondname;
-            var td3 = document.createElement("td");
-            td3.className = "tdstyle";
-            td3.textContent = data[i].surname;
-            var td4 = document.createElement("td");
-            td4.className = "tdstyle";
-            td4.textContent = data[i].position.name;
-            var td5 = document.createElement("td");
-            td5.className = "tdstyle";
-            td5.textContent = data[i].department.name;
-            if (data[i].boss.surname == null) {
-                data[i].boss.surname = "";
-            }
-            var td6 = document.createElement("td");
-            td6.className = "tdstyle";
-            td6.textContent = data[i].boss.surname;
-            var td7 = document.createElement("td");
-            td7.className = "tdstyle";
-            td7.textContent = DocManager.ToReadableDate(new Date(data[i].recruitDate));
-            var td8 = document.createElement("td");
-            td8.className = "tdstyle";
-            var a1 = document.createElement("a");
-            a1.className = "editButton";
-            a1.textContent = "Изменить";
-            var id = data[i].id;
-            a1.addEventListener("click", function (e) {
-                e.preventDefault();
-                EmpRequest.GetEdit(DocManager.SetUpEdit, id);
-            }, false);
-            var a2 = document.createElement("a");
-            a2.className = "bossesButton";
-            a2.textContent = "Руководители";
-            a2.addEventListener("click", function (e) {
-                e.preventDefault();
-                //TODO
-            }, false);
-            var a3 = document.createElement("a");
-            a3.className = "deleteButton";
-            a3.textContent = "Удалить";
-            a3.addEventListener("click", function (e) {
-                e.preventDefault();
-                EmpRequest.GetDelete(DocManager.SetUpDelete, id);
-            }, false);
-            var tr21 = document.createElement("tr");
-            var tr22 = document.createElement("tr");
-            var tr23 = document.createElement("tr");
-            var td21 = document.createElement("td");
-            var td22 = document.createElement("td");
-            var td23 = document.createElement("td");
-            td21.appendChild(a1);
-            td22.appendChild(a2);
-            td23.appendChild(a3);
-            tr21.appendChild(td21);
-            tr22.appendChild(td22);
-            tr23.appendChild(td23);
-            td8.appendChild(tr21);
-            td8.appendChild(tr22);
-            td8.appendChild(tr23);
-            tr.appendChild(td1);
-            tr.appendChild(td2);
-            tr.appendChild(td3);
-            tr.appendChild(td4);
-            tr.appendChild(td5);
-            tr.appendChild(td6);
-            tr.appendChild(td7);
-            tr.appendChild(td8);
-            tbody.appendChild(tr);
-        };
+        tbody.id = "tableBody";
         for (var i = 0; i < data.length; ++i) {
-            _loop_1(i);
+            DocManager.AddRow(data[i], tbody);
         }
         table.appendChild(tbody);
         $("#empTable").html(table);
@@ -401,6 +328,91 @@ var DocManager = /** @class */ (function () {
         children[4].textContent = emp.department.name;
         children[5].textContent = emp.boss.surname;
         children[6].textContent = DocManager.ToReadableDate(new Date(emp.recruitDate));
+    };
+    DocManager.RemoveRow = function (id) {
+        $("#" + id).remove();
+    };
+    DocManager.AddRow = function (emp, tbody) {
+        if (tbody === void 0) { tbody = null; }
+        var tr = document.createElement("tr");
+        tr.id = String(emp.id);
+        var td1 = document.createElement("td");
+        td1.className = "tdstyle";
+        td1.textContent = emp.name;
+        var td2 = document.createElement("td");
+        td2.className = "tdstyle";
+        td2.textContent = emp.secondname;
+        var td3 = document.createElement("td");
+        td3.className = "tdstyle";
+        td3.textContent = emp.surname;
+        var td4 = document.createElement("td");
+        td4.className = "tdstyle";
+        td4.textContent = emp.position.name;
+        var td5 = document.createElement("td");
+        td5.className = "tdstyle";
+        td5.textContent = emp.department.name;
+        if (emp.boss.surname == null) {
+            emp.boss.surname = "";
+        }
+        var td6 = document.createElement("td");
+        td6.className = "tdstyle";
+        td6.textContent = emp.boss.surname;
+        var td7 = document.createElement("td");
+        td7.className = "tdstyle";
+        td7.textContent = DocManager.ToReadableDate(new Date(emp.recruitDate));
+        var td8 = document.createElement("td");
+        td8.className = "tdstyle";
+        var a1 = document.createElement("a");
+        a1.className = "editButton";
+        a1.textContent = "Изменить";
+        var id = emp.id;
+        a1.addEventListener("click", function (e) {
+            e.preventDefault();
+            EmpRequest.GetEdit(DocManager.SetUpEdit, id);
+        }, false);
+        var a2 = document.createElement("a");
+        a2.className = "bossesButton";
+        a2.textContent = "Руководители";
+        a2.addEventListener("click", function (e) {
+            e.preventDefault();
+            //TODO
+        }, false);
+        var a3 = document.createElement("a");
+        a3.className = "deleteButton";
+        a3.textContent = "Удалить";
+        a3.addEventListener("click", function (e) {
+            e.preventDefault();
+            EmpRequest.GetDelete(DocManager.SetUpDelete, id);
+        }, false);
+        var tr21 = document.createElement("tr");
+        var tr22 = document.createElement("tr");
+        var tr23 = document.createElement("tr");
+        var td21 = document.createElement("td");
+        var td22 = document.createElement("td");
+        var td23 = document.createElement("td");
+        td21.appendChild(a1);
+        td22.appendChild(a2);
+        td23.appendChild(a3);
+        tr21.appendChild(td21);
+        tr22.appendChild(td22);
+        tr23.appendChild(td23);
+        td8.appendChild(tr21);
+        td8.appendChild(tr22);
+        td8.appendChild(tr23);
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tr.appendChild(td4);
+        tr.appendChild(td5);
+        tr.appendChild(td6);
+        tr.appendChild(td7);
+        tr.appendChild(td8);
+        if (tbody == null) {
+            document.getElementById("tableBody").appendChild(tr);
+        }
+        else {
+            tbody.appendChild(tr);
+        }
     };
     DocManager.ToReadableDate = function (date) {
         var y = date.getFullYear();
