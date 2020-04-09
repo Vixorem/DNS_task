@@ -1,11 +1,23 @@
-var currPage = 1;
+var SortType;
+(function (SortType) {
+    SortType[SortType["NoSort"] = 0] = "NoSort";
+    SortType[SortType["ASC"] = 1] = "ASC";
+    SortType[SortType["DESC"] = 2] = "DESC";
+})(SortType || (SortType = {}));
+var ColumnSort;
+(function (ColumnSort) {
+    ColumnSort[ColumnSort["None"] = -1] = "None";
+    ColumnSort[ColumnSort["FullName"] = 0] = "FullName";
+    ColumnSort[ColumnSort["Position"] = 3] = "Position";
+})(ColumnSort || (ColumnSort = {}));
+var CurrPage = 1;
+var SortCol = ColumnSort.None;
+var SortT = SortType.NoSort;
 $(function () {
-    EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+    EmpRequest.GetEmployees(CurrPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
     $("#add").click(function (event) {
         event.preventDefault();
         EmpRequest.GetCreate(DocManager.SetUpSelections);
-    });
-    $("#aboutPage").click(function (event) {
     });
 });
 var Position = /** @class */ (function () {
@@ -292,7 +304,7 @@ var DocManager = /** @class */ (function () {
         var surname = children[2].textContent;
         var pos = children[3].textContent;
         var dep = children[4].textContent;
-        $("#info").text(name + " " + secondname + " " + surname + " ( " + dep + ", " + pos + ")");
+        $("#info").text(name + " " + secondname + " " + surname + " (" + dep + ", " + pos + ")");
     };
     DocManager.SetUpEdit = function (emp) {
         $("#name").val(emp.name);
@@ -313,6 +325,42 @@ var DocManager = /** @class */ (function () {
         for (var i = 0; i < EmpRequest.tableHeaders.length; ++i) {
             var th = document.createElement("th");
             th.className = "thstyle";
+            th.id = "header" + i;
+            // Мне кажется, проще было сделать сортировку по любому столбцу :)
+            if (i == ColumnSort.FullName) {
+                th.addEventListener("click", function () {
+                    SortCol = ColumnSort.FullName;
+                    if (SortT == SortType.NoSort) {
+                        SortT = SortType.ASC;
+                    }
+                    else if (SortT == SortType.ASC) {
+                        SortT = SortType.DESC;
+                    }
+                    else if (SortT == SortType.DESC) {
+                        SortT = SortType.ASC;
+                    }
+                    var sorted = $("#tableBody").children().toArray().sort(DocManager.Cmp);
+                    $("#tableBody").empty();
+                    $("#tableBody").append(sorted);
+                });
+            }
+            if (i == ColumnSort.Position) {
+                th.addEventListener("click", function () {
+                    SortCol = ColumnSort.Position;
+                    if (SortT == SortType.NoSort) {
+                        SortT = SortType.ASC;
+                    }
+                    else if (SortT == SortType.ASC) {
+                        SortT = SortType.DESC;
+                    }
+                    else if (SortT == SortType.DESC) {
+                        SortT = SortType.ASC;
+                    }
+                    var sorted = $("#tableBody").children().toArray().sort(DocManager.Cmp);
+                    $("#tableBody").empty();
+                    $("#tableBody").append(sorted);
+                });
+            }
             th.textContent = EmpRequest.tableHeaders[i];
             tr.appendChild(th);
         }
@@ -443,7 +491,7 @@ var DocManager = /** @class */ (function () {
         $("#pages").empty();
         var _loop_1 = function (i) {
             var a = document.createElement("a");
-            if (i == currPage) {
+            if (i == CurrPage) {
                 a.className = "current";
             }
             else {
@@ -453,13 +501,41 @@ var DocManager = /** @class */ (function () {
             a.textContent = "" + i;
             a.addEventListener("click", function (e) {
                 e.preventDefault();
-                currPage = i;
-                EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+                CurrPage = i;
+                EmpRequest.GetEmployees(CurrPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
             }, false);
             $("#pages").append(a);
         };
         for (var i = 1; i <= pagesNum; ++i) {
             _loop_1(i);
+        }
+    };
+    DocManager.Cmp = function (a, b) {
+        if (SortCol == ColumnSort.FullName) {
+            var s1 = $($(a).children()[0]).text() +
+                $($(a).children()[1]).text() + $($(a).children()[2]).text();
+            var s2 = $($(b).children()[0]).text() +
+                $($(b).children()[1]).text() + $($(b).children()[2]).text();
+            var t = (SortT == SortType.ASC) ? (-1) : (1);
+            if (s1 < s2) {
+                return t;
+            }
+            if (s1 > s2) {
+                return -t;
+            }
+            return 0;
+        }
+        else if (SortCol == ColumnSort.Position) {
+            var s1 = $($(a).children()[ColumnSort.Position]).text();
+            var s2 = $($(b).children()[ColumnSort.Position]).text();
+            var t = (SortT == SortType.ASC) ? (-1) : (1);
+            if (s1 < s2) {
+                return t;
+            }
+            if (s1 > s2) {
+                return -t;
+            }
+            return 0;
         }
     };
     return DocManager;

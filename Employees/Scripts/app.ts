@@ -1,18 +1,27 @@
-﻿var currPage = 1;
+﻿enum SortType {
+    NoSort,
+    ASC,
+    DESC
+}
+
+enum ColumnSort {
+    None = -1,
+    FullName = 0,
+    Position = 3
+}
+
+let CurrPage = 1;
+let SortCol: ColumnSort = ColumnSort.None;
+let SortT: SortType = SortType.NoSort;
 
 $(() => {
-    EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+    EmpRequest.GetEmployees(CurrPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
 
     $("#add").click(function (event) {
         event.preventDefault();
         EmpRequest.GetCreate(DocManager.SetUpSelections);
     });
-
-    $("#aboutPage").click(function (event) {
-    });
-
 });
-
 
 class Position {
     Id: number;
@@ -325,7 +334,7 @@ class DocManager {
         let surname = children[2].textContent;
         let pos = children[3].textContent;
         let dep = children[4].textContent;
-        $("#info").text(`${name} ${secondname} ${surname} ( ${dep}, ${pos})`);
+        $("#info").text(`${name} ${secondname} ${surname} (${dep}, ${pos})`);
     }
 
     static SetUpEdit(emp): void {
@@ -349,6 +358,38 @@ class DocManager {
         for (let i = 0; i < EmpRequest.tableHeaders.length; ++i) {
             let th = document.createElement("th");
             th.className = "thstyle";
+            th.id = `header${i}`;
+            // Мне кажется, проще было сделать сортировку по любому столбцу :)
+            if (i == ColumnSort.FullName) {
+                th.addEventListener("click", function () {
+                    SortCol = ColumnSort.FullName;
+                    if (SortT == SortType.NoSort) {
+                        SortT = SortType.ASC;
+                    } else if (SortT == SortType.ASC) {
+                        SortT = SortType.DESC;
+                    } else if (SortT == SortType.DESC) {
+                        SortT = SortType.ASC;
+                    }
+                    let sorted = $("#tableBody").children().toArray().sort(DocManager.Cmp);
+                    $("#tableBody").empty();
+                    $("#tableBody").append(sorted);
+                });
+            }
+            if (i == ColumnSort.Position) {
+                th.addEventListener("click", function () {
+                    SortCol = ColumnSort.Position;
+                    if (SortT == SortType.NoSort) {
+                        SortT = SortType.ASC;
+                    } else if (SortT == SortType.ASC) {
+                        SortT = SortType.DESC;
+                    } else if (SortT == SortType.DESC) {
+                        SortT = SortType.ASC;
+                    }
+                    let sorted = $("#tableBody").children().toArray().sort(DocManager.Cmp);
+                    $("#tableBody").empty();
+                    $("#tableBody").append(sorted);
+                });
+            }
             th.textContent = EmpRequest.tableHeaders[i];
             tr.appendChild(th);
         }
@@ -490,7 +531,7 @@ class DocManager {
         $("#pages").empty();
         for (let i = 1; i <= pagesNum; ++i) {
             let a = document.createElement("a");
-            if (i == currPage) {
+            if (i == CurrPage) {
                 a.className = "current";
             } else {
                 a.className = "page";
@@ -499,10 +540,38 @@ class DocManager {
             a.textContent = `${i}`;
             a.addEventListener("click", function (e) {
                 e.preventDefault();
-                currPage = i;
-                EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+                CurrPage = i;
+                EmpRequest.GetEmployees(CurrPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
             }, false);
             $("#pages").append(a);
+        }
+    }
+
+    static Cmp(a, b): number {
+        if (SortCol == ColumnSort.FullName) {
+            let s1 = $($(a).children()[0]).text() +
+                $($(a).children()[1]).text() + $($(a).children()[2]).text();
+            let s2 = $($(b).children()[0]).text() +
+                $($(b).children()[1]).text() + $($(b).children()[2]).text();
+            let t = (SortT == SortType.ASC) ? (-1) : (1);
+            if (s1 < s2) {
+                return t;
+            }
+            if (s1 > s2) {
+                return -t;
+            }
+            return 0;
+        } else if (SortCol == ColumnSort.Position) {
+            let s1 = $($(a).children()[ColumnSort.Position]).text();
+            let s2 = $($(b).children()[ColumnSort.Position]).text();
+            let t = (SortT == SortType.ASC) ? (-1) : (1);
+            if (s1 < s2) {
+                return t;
+            }
+            if (s1 > s2) {
+                return -t;
+            }
+            return 0;
         }
     }
 }
