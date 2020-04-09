@@ -393,6 +393,15 @@ namespace Employees.Data
                     c.Parameters.AddWithValue("@Name", "Специалист по закупке");
                     c.ExecuteNonQuery();
                     c.Parameters.Clear();
+                    c.Parameters.AddWithValue("@Name", "Помощник");
+                    c.ExecuteNonQuery();
+                    c.Parameters.Clear();
+                    c.Parameters.AddWithValue("@Name", "Технический специалист");
+                    c.ExecuteNonQuery();
+                    c.Parameters.Clear();
+                    c.Parameters.AddWithValue("@Name", "Стажер");
+                    c.ExecuteNonQuery();
+                    c.Parameters.Clear();
                 }
             }
         }

@@ -22,7 +22,7 @@ namespace Employees.Controllers
         [HttpGet]
         public IActionResult GetEmployees(int id)
         {
-            if (id > rowsOnPage)
+            if (id > rowsOnPage || id < 0)
             {
                 return Json(new
                 {
@@ -30,11 +30,12 @@ namespace Employees.Controllers
                     responseText = "The page doesn't exist"
                 });
             }
-            var employees = _context.FetchEmployeesRange(rowsOnPage, 1);
+            var totalPagesNum = (int)Math.Ceiling(_context.EmployeesCount() / (double)rowsOnPage);
+            var employees = _context.FetchEmployeesRange(rowsOnPage, id);
             return Json(new
             {
                 success = true,
-                totalPagesNum = Math.Ceiling(_context.EmployeesCount() / (double)rowsOnPage),
+                totalPagesNum,
                 employees
             });
         }
@@ -131,8 +132,11 @@ namespace Employees.Controllers
 
             _context.AddEmployee(employee);
             var emp = _context.FetchLastEmployee();
+            var totalPagesNum = (int)Math.Ceiling(_context.EmployeesCount() / (double)rowsOnPage);
             return Json(new
             {
+                totalPagesNum,
+                updateRow = _context.EmployeesCount() % rowsOnPage != 0,
                 success = true,
                 employee = emp
             });
@@ -151,7 +155,6 @@ namespace Employees.Controllers
             }
 
             _context.DeleteEmployee(id);
-
             return Json(new
             {
                 success = true,

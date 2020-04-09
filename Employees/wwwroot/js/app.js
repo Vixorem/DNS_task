@@ -1,5 +1,6 @@
+var currPage = 1;
 $(function () {
-    EmpRequest.GetEmployees(1, DocManager.SetUpEmployees, DocManager.SetUpPages);
+    EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
     $("#add").click(function (event) {
         event.preventDefault();
         EmpRequest.GetCreate(DocManager.SetUpSelections);
@@ -116,6 +117,7 @@ var EmpRequest = /** @class */ (function () {
             if (response.success) {
                 console.log("GET succeed");
                 setUpEmp(response.employees);
+                setUpPages(response.totalPagesNum);
             }
             else {
                 console.log("GET succeed");
@@ -123,24 +125,6 @@ var EmpRequest = /** @class */ (function () {
         }).fail(function (response) {
             console.log("GET failed");
         });
-        //$.ajax({
-        //    type: "POST",
-        //    url: "/Employees/GetEmployees/",
-        //    contentType: "application/json; charset=utf-8",
-        //    dataType: "json",
-        //    data: JSON.stringify(pageNum),
-        //    success: function (response) {
-        //        if (response.success) {
-        //            console.log("POST succeed");
-        //            setUpEmp(response.employees);
-        //        } else {
-        //            console.log("POST succeed");
-        //        }
-        //    },
-        //    error: function (response) {
-        //        console.log("POST failed");
-        //    }
-        //});
     };
     EmpRequest.GetBosses = function (f, ref) {
         console.log("GET request for GetBosses()");
@@ -200,8 +184,10 @@ var EmpRequest = /** @class */ (function () {
                 if (response.success) {
                     console.log("POST succeed");
                     DocManager.RemoveAppearingHtml();
-                    DocManager.AddRow(response.employee);
-                    //TODO: не вставлять, если не на той странице?
+                    if (response.updateRow) {
+                        DocManager.AddRow(response.employee);
+                    }
+                    DocManager.SetUpPages(response.totalPagesNum);
                 }
                 else {
                     alert("Сервер не смог обработать запрос, " +
@@ -453,7 +439,28 @@ var DocManager = /** @class */ (function () {
             ("0" + date.getDate()) : (date.getDate());
         return y + "-" + m + "-" + d;
     };
-    DocManager.SetUpPages = function () {
+    DocManager.SetUpPages = function (pagesNum) {
+        $("#pages").empty();
+        var _loop_1 = function (i) {
+            var a = document.createElement("a");
+            if (i == currPage) {
+                a.className = "current";
+            }
+            else {
+                a.className = "page";
+            }
+            a.id = "" + i;
+            a.textContent = "" + i;
+            a.addEventListener("click", function (e) {
+                e.preventDefault();
+                currPage = i;
+                EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+            }, false);
+            $("#pages").append(a);
+        };
+        for (var i = 1; i <= pagesNum; ++i) {
+            _loop_1(i);
+        }
     };
     return DocManager;
 }());

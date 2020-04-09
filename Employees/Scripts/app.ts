@@ -1,5 +1,7 @@
-﻿$(() => {
-    EmpRequest.GetEmployees(1, DocManager.SetUpEmployees, DocManager.SetUpPages);
+﻿var currPage = 1;
+
+$(() => {
+    EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
 
     $("#add").click(function (event) {
         event.preventDefault();
@@ -146,6 +148,7 @@ class EmpRequest {
             if (response.success) {
                 console.log("GET succeed");
                 setUpEmp(response.employees);
+                setUpPages(response.totalPagesNum);
             } else {
                 console.log("GET succeed");
             }
@@ -219,8 +222,10 @@ class EmpRequest {
                 if (response.success) {
                     console.log("POST succeed");
                     DocManager.RemoveAppearingHtml();
-                    DocManager.AddRow(response.employee);
-                    //TODO: не вставлять, если не на той странице?
+                    if (response.updateRow) {
+                        DocManager.AddRow(response.employee);
+                    }
+                    DocManager.SetUpPages(response.totalPagesNum);
                 } else {
                     alert("Сервер не смог обработать запрос, " +
                         "возможно, перезагрузка страницы cможет помочь");
@@ -481,7 +486,23 @@ class DocManager {
         return `${y}-${m}-${d}`;
     }
 
-    static SetUpPages(): void {
-
+    static SetUpPages(pagesNum: number): void {
+        $("#pages").empty();
+        for (let i = 1; i <= pagesNum; ++i) {
+            let a = document.createElement("a");
+            if (i == currPage) {
+                a.className = "current";
+            } else {
+                a.className = "page";
+            }
+            a.id = `${i}`;
+            a.textContent = `${i}`;
+            a.addEventListener("click", function (e) {
+                e.preventDefault();
+                currPage = i;
+                EmpRequest.GetEmployees(currPage, DocManager.SetUpEmployees, DocManager.SetUpPages);
+            }, false);
+            $("#pages").append(a);
+        }
     }
 }
