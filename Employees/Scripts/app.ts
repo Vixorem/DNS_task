@@ -1,4 +1,6 @@
-﻿enum SortType {
+﻿// @ts-nocheck
+
+enum SortType {
     NoSort,
     ASC,
     DESC

@@ -1,3 +1,4 @@
+// @ts-nocheck
 var SortType;
 (function (SortType) {
     SortType[SortType["NoSort"] = 0] = "NoSort";
