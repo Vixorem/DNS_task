@@ -1,0 +1,26 @@
+﻿@model Employees.Models.Employee
+
+@{
+    ViewData["Title"] = "Bosses";
+}
+
+<style>
+    div.field {
+        padding-bottom: 5px;
+    }
+
+        div.field label {
+            display: block;
+        }
+</style>
+
+<h4>Руководители</h4>
+<hr />
+<div>
+    <div align="center">
+        <form id="bossesForm">
+            <ul id="bossesList"></ul>
+        </form>
+    </div>
+    <a id="close" href="" style="text-decoration: none">Закрыть</a>
+</div>

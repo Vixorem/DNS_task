@@ -139,14 +139,26 @@ var EmpRequest = /** @class */ (function () {
             console.log("GET failed");
         });
     };
-    EmpRequest.GetBosses = function (f, ref) {
-        console.log("GET request for GetBosses()");
-        $.getJSON(ref, function (data) {
-        }).done(function (data) {
+    EmpRequest.GetBosses = function (f, id) {
+        console.log("GET to Bosses()");
+        $("#appearingLayout").load("Employees/Bosses/", function () {
             console.log("GET succeed");
-            f();
-        }).fail(function (data) {
-            console.log("GET failed");
+            console.log("GET request for GetBosses()");
+            $.getJSON("Employees/GetBosses/" + id, function (response) {
+                if (response.success) {
+                    console.log("GET succeed");
+                    f(response.bosses);
+                    $("#close").click(function (event) {
+                        event.preventDefault();
+                        DocManager.RemoveAppearingHtml();
+                    });
+                }
+                else {
+                    console.log("GET failed");
+                }
+            }).fail(function () {
+                console.log("GET failed");
+            });
         });
     };
     EmpRequest.GetCreate = function (f) {
@@ -296,7 +308,12 @@ var DocManager = /** @class */ (function () {
         }
         $("#recdate").val(DocManager.ToHTMLDate(new Date()));
     };
-    DocManager.SetUpBosses = function () {
+    DocManager.SetUpBosses = function (bosses) {
+        for (var i = 0; i < bosses.length; ++i) {
+            var li = document.createElement("li");
+            li.textContent = bosses[i].surname + " " + bosses[i].name[0] + ". " + bosses[i].secondname[0] + ", " + bosses[i].position.name;
+            $("#bossesList").append(li);
+        }
     };
     DocManager.SetUpDelete = function (id) {
         var children = $("#" + id).children();
@@ -327,7 +344,7 @@ var DocManager = /** @class */ (function () {
             var th = document.createElement("th");
             th.className = "thstyle";
             th.id = "header" + i;
-            // Мне кажется, проще было сделать сортировку по любому столбцу :)
+            // Мне кажется, проще было сделать сортировку по любому столбцу
             if (i == ColumnSort.FullName) {
                 th.addEventListener("click", function () {
                     SortCol = ColumnSort.FullName;
@@ -431,7 +448,7 @@ var DocManager = /** @class */ (function () {
         a2.textContent = "Руководители";
         a2.addEventListener("click", function (e) {
             e.preventDefault();
-            //TODO
+            EmpRequest.GetBosses(DocManager.SetUpBosses, id);
         }, false);
         var a3 = document.createElement("a");
         a3.className = "deleteButton";

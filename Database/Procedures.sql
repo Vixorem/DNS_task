@@ -398,10 +398,66 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE FetchBossesForId
+CREATE PROCEDURE FetchBossesForId @Id INT
 AS
 BEGIN
 	SET NOCOUNT ON;
+
+	WITH Bosses (
+		[Id]
+		,[Name]
+		,[Secondname]
+		,[Surname]
+		,[BossId]
+		,[BossSurname]
+		,[PositionId]
+		,[PosName]
+		,[DepartmentId]
+		,[DepName]
+		,[RecruitDate]
+		)
+	AS (
+		SELECT [Emp].[Id]
+			,[Emp].[Name]
+			,[Emp].[Secondname]
+			,[Emp].[Surname]
+			,[Emp].[BossId]
+			,[Boss].[Surname] AS BossSurname
+			,[Emp].[PositionId]
+			,[Pos].[Name] AS PosName
+			,[Emp].[DepartmentId]
+			,[Dep].[Name] AS DepName
+			,[Emp].[RecruitDate]
+		FROM dbo.Employees AS Emp
+		JOIN dbo.Employees AS Boss ON Emp.BossId = Boss.[Id]
+			OR Emp.[Id] IS NULL
+		JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.[Id]
+		JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.[Id]
+		WHERE Emp.[Id] = @Id
+		
+		UNION ALL
+		
+		SELECT [Emp].[Id]
+			,[Emp].[Name]
+			,[Emp].[Secondname]
+			,[Emp].[Surname]
+			,[Emp].[BossId]
+			,[Boss].[Surname] AS BossSurname
+			,[Emp].[PositionId]
+			,[Pos].[Name] AS PosName
+			,[Emp].[DepartmentId]
+			,[Dep].[Name] AS DepName
+			,[Emp].[RecruitDate]
+		FROM Bosses AS Boss
+		JOIN dbo.Employees AS Emp ON (
+				Boss.BossId IS NOT NULL
+				AND Boss.BossId = Emp.Id
+				)
+		JOIN dbo.Departments AS Dep ON Emp.DepartmentId = Dep.[Id]
+		JOIN dbo.Positions AS Pos ON Emp.PositionId = Pos.[Id]
+		)
+	SELECT *
+	FROM Bosses
 END
 GO
 

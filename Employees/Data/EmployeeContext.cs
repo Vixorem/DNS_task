@@ -203,6 +203,57 @@ namespace Employees.Data
             return FetchEmployeesRange(cnt, 1);
         }
 
+        public IList<Employee> FetchBossesForId(int id)
+        {
+            List<Employee> bosses = new List<Employee>();
+
+
+            using (var connect = new SqlConnection(connectionStr))
+            {
+                connect.Open();
+                var cmd = new SqlCommand("FetchBossesForId", connect)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.AddWithValue("@Id", id);
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    bosses.Add(
+                        new Employee()
+                        {
+                            Id = reader.GetInt32(0),
+                            Name = (string)reader.GetString(1),
+                            Secondname = reader.GetString(2),
+                            Surname = reader.GetString(3),
+                            BossId = (Convert.IsDBNull(reader.GetValue(4))) ? (null) : ((int?)reader.GetValue(4)),
+                            Boss = new Employee
+                            {
+                                    //Id = (int)reader.GetValue(4),
+                                    Surname = reader.GetString(5)
+                            },
+                            PositionId = reader.GetInt32(6),
+                            Position = new Position
+                            {
+                                Id = reader.GetInt32(6),
+                                Name = reader.GetString(7)
+                            },
+                            DepartmentId = reader.GetInt32(8),
+                            Department = new Department
+                            {
+                                Id = reader.GetInt32(8),
+                                Name = reader.GetString(9)
+                            },
+                            RecruitDate = reader.GetDateTime(10)
+                        });
+                }
+
+            }
+            return bosses;
+        }
+
         public IList<Department> FetchAllDepartments()
         {
             List<Department> departments = new List<Department>();

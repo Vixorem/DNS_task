@@ -20,6 +20,34 @@ namespace Employees.Controllers
         }
 
         [HttpGet]
+        public IActionResult Bosses()
+        {
+            return PartialView();
+        }
+
+
+        [HttpGet]
+        public IActionResult GetBosses(int id)
+        {
+            if (EmployeeExists(id) == false)
+            {
+                return Json(new
+                {
+                    success = false,
+                    responseText = "The employee never existed or already removed"
+                });
+            }
+
+            var bosses = _context.FetchBossesForId(id);
+
+            return Json(new
+            {
+                success = true,
+                bosses
+            });
+        }
+
+        [HttpGet]
         public IActionResult GetEmployees(int id)
         {
             if (id > rowsOnPage || id < 0)

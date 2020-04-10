@@ -169,14 +169,25 @@ class EmpRequest {
 
     }
 
-    static GetBosses(f: Function, ref: string): void {
-        console.log("GET request for GetBosses()");
-        $.getJSON(ref, function (data) {
-        }).done(function (data) {
+    static GetBosses(f: Function, id): void {
+        console.log("GET to Bosses()");
+        $("#appearingLayout").load("Employees/Bosses/", function () {
             console.log("GET succeed");
-            f();
-        }).fail(function (data) {
-            console.log("GET failed");
+            console.log("GET request for GetBosses()");
+            $.getJSON(`Employees/GetBosses/${id}`, function (response) {
+                if (response.success) {
+                    console.log("GET succeed");
+                    f(response.bosses);
+                    $("#close").click(function (event) {
+                        event.preventDefault();
+                        DocManager.RemoveAppearingHtml();
+                    });
+                } else {
+                    console.log("GET failed");
+                }
+            }).fail(function () {
+                console.log("GET failed");
+            });
         });
     }
 
@@ -325,8 +336,12 @@ class DocManager {
         $("#recdate").val(DocManager.ToHTMLDate(new Date()));
     }
 
-    static SetUpBosses(): void {
-
+    static SetUpBosses(bosses): void {
+        for (let i = 0; i < bosses.length; ++i) {
+            let li = document.createElement("li");
+            li.textContent = `${bosses[i].surname} ${bosses[i].name[0]}. ${bosses[i].secondname[0]}, ${bosses[i].position.name}`;
+            $("#bossesList").append(li);
+        }
     }
 
     static SetUpDelete(id) {
@@ -361,7 +376,7 @@ class DocManager {
             let th = document.createElement("th");
             th.className = "thstyle";
             th.id = `header${i}`;
-            // Мне кажется, проще было сделать сортировку по любому столбцу :)
+            // Мне кажется, проще было сделать сортировку по любому столбцу
             if (i == ColumnSort.FullName) {
                 th.addEventListener("click", function () {
                     SortCol = ColumnSort.FullName;
@@ -468,7 +483,7 @@ class DocManager {
         a2.textContent = "Руководители";
         a2.addEventListener("click", function (e) {
             e.preventDefault();
-            //TODO
+            EmpRequest.GetBosses(DocManager.SetUpBosses, id);
         }, false);
         let a3 = document.createElement("a");
         a3.className = "deleteButton";
